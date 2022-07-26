@@ -6,7 +6,7 @@ import {
   OnespanExecute,
   OnespanRegisterNotification,
   OnespanExecuteNotification,
-} from 'react-native-onespan-orchestration-sdk';
+} from '@vortigo/react-native-onespan-wrapper';
 import {
   Container,
   FormWrapper,

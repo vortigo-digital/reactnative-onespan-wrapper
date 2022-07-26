@@ -1,6 +1,6 @@
 {
-  "name": "react-native-onespan-wrapper",
-  "version": "0.1.0",
+  "name": "@vortigo/react-native-onespan-wrapper",
+  "version": "0.1.1",
   "description": "Onespan Wrapper for React Native",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
