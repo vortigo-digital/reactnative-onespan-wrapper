@@ -1,33 +1,18 @@
-# React Native Onespan Wrapper
-
+# React Native OneSpan Wrapper
 > React Native library that implements native Wrapper for Android
 
 ## Installation
-
----
-
 To install and set up the library, run:
 
 ```sh
 $ npm install @vortigo/react-native-onespan-wrapper --save
 ```
-
 Or if you prefer using Yarn:
-
 ```sh
 $ yarn add @vortigo/react-native-onespan-wrapper
 ```
-
 ## Usage
-
----
-
----
-
 ### Configuration
-
----
-
 ```sh
 import { OnespanConfig } from '@vortigo/react-native-onespan-wrapper';
 ```
@@ -47,7 +32,7 @@ OnespanConfig(accountIdentifier, cloudServerUrl, saltStorage, saltDigipass);
 
 </center>
 
-#### Example:
+**Example**
 
 ```js
 const configSDK = async (
@@ -74,10 +59,13 @@ const configSDK = async (
 
 ---
 
-### Activation
+### User Self-Registration
+#### Application Workflow
+![User Self-Registration](https://github.com/vortigo-digital/reactnative-onespan-wrapper/raw/main/assets/images/UserSelfRegistration.png)
 
+**Activation command**
 ---
-
+Import OnespanActivate from wrapper
 ```sh
 import { OnespanActivate } from '@vortigo/react-native-onespan-wrapper';
 ```
@@ -88,8 +76,7 @@ And then call the method passing the authentication parameters
 startActivation(userIdentifier, activationPassword);
 ```
 
-#### Example:
-
+**Example**
 ```js
 async function activate(userIdentifier: string, activationPassword: string) {
   // Call native method `OSActivationModule.activate` that will
@@ -110,23 +97,20 @@ async function activate(userIdentifier: string, activationPassword: string) {
 }
 ```
 
+**Execute command**
 ---
-
-### Execute command
-
----
-
+Import OnespanExecute from wrapper
 ```sh
 import { OnespanExecute } from '@vortigo/react-native-onespan-wrapper';
 ```
 
-Send a command to be interpreted by the Onespan Native SDK
+and send a command to be interpreted by the Onespan Native SDK
 
 ```js
 OnespanExecute(command);
 ```
 
-#### Example:
+**Example**
 
 ```js
 async function executeCommand(command: string) {
@@ -137,20 +121,22 @@ async function executeCommand(command: string) {
 
 ---
 
-### Register Notification
+### Push Notification Registration
+#### Application workflow
+![Push Notification Registration](https://github.com/vortigo-digital/reactnative-onespan-wrapper/raw/main/assets/images/PushNotificationRegistrations.png)
 
+**OnespanRegisterNotification command**
 ---
-
+Import OnespanRegisterNotification from wrapper
 ```sh
 import { OnespanRegisterNotification } from '@vortigo/react-native-onespan-wrapper';
 ```
-
+And dispach `OnespanRegisterNotification`
 ```js
 OnespanRegisterNotification();
 ```
 
-#### Example:
-
+**Example**
 ```js
 async function registerNotification() {
   const command = await OnespanRegisterNotification();
@@ -165,21 +151,20 @@ async function registerNotification() {
 }
 ```
 
+**Execute command**
 ---
-
-### Execute notification command
-
----
-
+Import OnespanExecuteNotification from wrapper
 ```sh
 import { OnespanExecuteNotification } from '@vortigo/react-native-onespan-wrapper';
 ```
+
+And dispach `OnespanExecuteNotification`
 
 ```js
 onespanNotificationExecute(command);
 ```
 
-#### Example:
+**Example**
 
 ```js
 async function onespanNotificationExecute(command: string) {
