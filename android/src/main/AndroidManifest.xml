@@ -1,0 +1,54 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  package="com.reactnativeonespanbridgeandroid">
+
+  <!-- Needed for online activation and general networking usage -->
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+  <!-- Needed for Bluetooth collect in CDDC -->
+  <uses-permission
+    android:name="android.permission.BLUETOOTH"
+    android:maxSdkVersion="30" />
+  <uses-permission
+    android:name="android.permission.BLUETOOTH_ADMIN"
+    android:maxSdkVersion="30" />
+  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+  <!-- Needed for Wifi collect in CDDC -->
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+  <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
+  <!-- Needed for Geolocation, Bluetooth and Wifi CDDC collection -->
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+  <application>
+
+    <!--<activity
+      android:name=".notification.AuthNotificationActivity"
+      android:exported="true"
+      android:launchMode="singleInstance">
+      &lt;!&ndash; This intent filter is used to select the activity that will be launched
+            when the user clicks on a notification.
+            The MIME type is customizable. Make sure it matches the "notificationMIMEType"
+            property in the assets/vasco.properties file. &ndash;&gt;
+      <intent-filter tools:ignore="AppLinkUrlError">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="string" />
+      </intent-filter>
+    </activity>-->
+
+    <service
+      android:name="com.google.firebase.messaging.FirebaseMessagingService"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+      </intent-filter>
+    </service>
+
+  </application>
+
+</manifest>

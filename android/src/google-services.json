@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1009698929039",
+    "project_id": "onespan-sample-36be2",
+    "storage_bucket": "onespan-sample-36be2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009698929039:android:333dee63571908e577f3fa",
+        "android_client_info": {
+          "package_name": "com.reactnativeonespanbridgeandroid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1009698929039-j9r798cprhq6s69gma82r4cusafkg21m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.reactnativeonespanbridgeandroid",
+            "certificate_hash": "62ef4ccf015b33d0f7914575b0f88ca2b5c47186"
+          }
+        },
+        {
+          "client_id": "1009698929039-rl72gs3meadh8u6ppr7qq1fiur07gmdg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClloRL4mO76IX9QopTgYHkP2fSVUQQohI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1009698929039-rl72gs3meadh8u6ppr7qq1fiur07gmdg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
