@@ -1,14 +1,9 @@
 import axios from 'axios';
 
-type RegisterUserProps = {
-  commandsURL: string;
-  command: string;
-};
+const baseURL = `https://sybrandreinders-vort.sdb.tid.onespan.cloud`;
+const commandsURL = `${baseURL}/v1/orchestration-commands`;
 
-const sendCommandToBackend = async ({
-  commandsURL,
-  command,
-}: RegisterUserProps) => {
+const executeAPICommand = async (command: string) => {
   try {
     const response = await axios.post(commandsURL, {
       command,
@@ -16,15 +11,13 @@ const sendCommandToBackend = async ({
 
     if (response?.data?.command) {
       const { command } = response.data;
-      console.log(`API command: ${command}`);
-
       return command;
     } else {
       throw new Error('Erro ao registrar usuário');
     }
   } catch (error) {
-    console.log(error);
+    console.log(`utils/sendCommandToBackend error: ${error}`);
   }
 };
 
-export default sendCommandToBackend;
+export default executeAPICommand;

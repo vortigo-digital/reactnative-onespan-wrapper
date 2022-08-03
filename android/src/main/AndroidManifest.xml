@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   package="com.reactnativeonespanbridgeandroid">
@@ -26,28 +27,48 @@
 
   <application>
 
-    <!--<activity
-      android:name=".notification.AuthNotificationActivity"
+    <!-- Needed for Notification -->
+    <meta-data
+      android:name="com.google.android.gms.version"
+      android:value="@integer/google_play_services_version" />
+
+    <activity
+      android:name=".authentication.AuthWithPushNotificationActivity"
       android:exported="true"
-      android:launchMode="singleInstance">
-      &lt;!&ndash; This intent filter is used to select the activity that will be launched
+      android:label="auth with push"
+      android:launchMode="singleTask"
+      android:screenOrientation="portrait">
+
+      <!-- This intent filter is used to select the activity that will be launched
             when the user clicks on a notification.
             The MIME type is customizable. Make sure it matches the "notificationMIMEType"
-            property in the assets/vasco.properties file. &ndash;&gt;
+            property in the assets/vasco.properties file. -->
       <intent-filter tools:ignore="AppLinkUrlError">
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
-        <data android:mimeType="string" />
+        <data android:mimeType="application/onespan-android-module" />
       </intent-filter>
-    </activity>-->
 
-    <service
+    </activity>
+
+    <!--<receiver
+      android:name=".notification.AuthBroadcastReceiver"
+      android:exported="true">
+      <intent-filter tools:ignore="AppLinkUrlError">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="application/onespan-android-module" />
+        <data android:mimeType="text/plain" />
+      </intent-filter>
+    </receiver>-->
+
+    <!--<service
       android:name="com.google.firebase.messaging.FirebaseMessagingService"
       android:exported="false">
       <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
       </intent-filter>
-    </service>
+    </service>-->
 
   </application>
 

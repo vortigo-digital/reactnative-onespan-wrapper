@@ -8,7 +8,6 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.reactnativeonespanbridgeandroid.settings.SessionHelper
 import com.reactnativeonespanbridgeandroid.utils.CDDCUtils
-import com.reactnativeonespanbridgeandroid.utils.CommandSender
 import com.reactnativeonespanbridgeandroid.utils.SharedPreferencesStorage
 import com.vasco.digipass.sdk.utils.notification.client.NotificationSDKClient
 import com.vasco.digipass.sdk.utils.notification.client.exceptions.NotificationSDKClientException
@@ -18,9 +17,6 @@ import com.vasco.orchestration.client.flows.notification.NotificationRegistratio
 import com.vasco.orchestration.client.flows.notification.NotificationRegistrationParams
 import com.vasco.orchestration.client.user.OrchestrationUser
 import java.lang.ref.WeakReference
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
 
 class OSRegisterNotificationModule(
   private val reactContext: ReactApplicationContext
@@ -81,8 +77,8 @@ class OSRegisterNotificationModule(
       }
 
       override fun onException(e: NotificationSDKClientException) {
-        // segundo exception
         Log.e(name, "Exception when retrieving notification Id: errorCode ${e.errorCode}", e)
+        notificationPromise.reject("errorCode", "Exception when retrieving notification Id: errorCode ${e.errorCode}")
       }
     }
 
@@ -113,7 +109,6 @@ class OSRegisterNotificationModule(
     Log.d("FLMWG", "execute command: $command")
     notificationPromise = promise
     orchestrator.execute(command)
-//    sendCommand(command)
   }
 
   // orchestration callbacks
@@ -128,32 +123,5 @@ class OSRegisterNotificationModule(
 
   override fun onOrchestrationServerError(error: OrchestrationServerError?) {
     Log.e(name, "onOrchestrationServerError, customPayload:${error?.customPayload}")
-  }
-
-
-  // remover quando react estiver pronto
-  private fun sendCommand(command: String?) {
-    val executor = Executors.newSingleThreadExecutor()
-
-    val commandSender = CommandSender(command ?: "")
-
-    val future: Future<String> = executor.submit(commandSender)
-
-    executor.submit {
-      try {
-        val serverCommand = future.get()
-
-        if (serverCommand == null) {
-          Log.e("FLMWG", "sendCommandToServer: serverCommand == null")
-
-        } else {
-          orchestrator.execute(serverCommand)
-        }
-
-      } catch (e: ExecutionException) {
-        Thread.currentThread().interrupt()
-        Log.e("FLMWG", "sendCommandToServer ExecutionException: $e")
-      }
-    }
   }
 }

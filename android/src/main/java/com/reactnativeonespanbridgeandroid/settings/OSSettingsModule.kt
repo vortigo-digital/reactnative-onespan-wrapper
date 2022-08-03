@@ -13,16 +13,14 @@ class OSSettingsModule(
 
   @ReactMethod
   fun setSettings(
-    accountIdentifier: String,
-    cloudServerUrl: String,
+    domainIdentifier: String,
     saltStorage: String,
     saltDigipass: String,
     promise: Promise
   ) {
     try {
       SessionHelper.apply {
-        this.accountIdentifier = accountIdentifier
-        this.cloudServerUrl = cloudServerUrl
+        this.domainIdentifier = domainIdentifier
         this.saltStorage = saltStorage
         this.saltDigipass = saltDigipass
       }

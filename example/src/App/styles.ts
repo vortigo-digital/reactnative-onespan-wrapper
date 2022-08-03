@@ -1,16 +1,41 @@
 import styled from 'styled-components/native';
 import { Button as BT, TextInput as TI } from 'react-native-paper';
 
-export const Container = styled.View`
+export const Container = styled.ScrollView.attrs({
+  contentContainerStyle: {
+    flex: 1,
+    padding: 30,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: '#f8f8f6',
+  },
+})`
   flex: 1;
-  padding: 30px;
-  justify-content: flex-start;
-  align-items: center;
-  background-color: #f8f8f6;
 `;
 export const Spacer = styled.View`
   width: 100%;
   height: 5px;
+`;
+export const Title = styled.View`
+  flex-direction: row;
+
+  width: 100%;
+  margin-bottom: 10px;
+`;
+export const Step = styled.View`
+  padding: 10px;
+  background-color: #000000;
+`;
+export const Description = styled.View`
+  flex: 1;
+  padding: 10px;
+  background-color: #345653;
+  margin-left: 2px;
+`;
+export const Text = styled.Text`
+  color: #ffffff;
+  text-align: center;
+  font-weight: bold;
 `;
 
 export const Eventbox = styled.ScrollView`
@@ -36,6 +61,12 @@ const AlertBox = styled.View`
 export const SuccessBox = styled(AlertBox)`
   background-color: #d4edda;
 `;
+export const InfoBox = styled(AlertBox)`
+  background-color: #000000;
+`;
+export const InfoText = styled.Text`
+  color: #ffffff;
+`;
 export const ErrorBox = styled(AlertBox)`
   background-color: #f8d7da;
 `;
@@ -45,7 +76,6 @@ export const ErrorText = styled.Text`
 export const SuccessText = styled.Text`
   color: #155724;
 `;
-export const Text = styled.Text``;
 
 export const ActivatedView = styled.View`
   width: 100%;

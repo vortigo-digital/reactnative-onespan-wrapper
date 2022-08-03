@@ -3,80 +3,90 @@ import React, { useState } from 'react';
 import { View, TextInput, Spacer, Button } from './styles';
 
 interface Props {
-  accountIdentifier: string;
-  cloudServerUrl: string;
+  apiURL: string;
+  domainIdentifier: string;
   saltStorage: string;
   saltDigipass: string;
-  onSubmit: (a: string, b: string, c: string, d: string) => void;
+  onSubmit: ({
+    apiURL,
+    domainIdentifier,
+    saltStorage,
+    saltDigipass,
+  }: {
+    apiURL: string;
+    domainIdentifier: string;
+    saltStorage: string;
+    saltDigipass: string;
+  }) => void;
 }
 
 const ConfigForm = ({
-  accountIdentifier,
-  cloudServerUrl,
+  apiURL,
+  domainIdentifier,
   saltStorage,
   saltDigipass,
   onSubmit,
 }: Props) => {
-  const [accountIdentifierUser, setAccountIdentifierUser] = useState<
-    string | null
-  >(null);
-  const [accountIdentifierDomain, setAccountIdentifierDomain] = useState<
+  const [domainIdentifierState, setDomainIdentifierState] = useState<
     string | null
   >(null);
   const [saltStorageState, setSaltStorageState] = useState<string | null>(null);
   const [saltDigipassState, setSaltDigipassState] = useState<string | null>(
     null
   );
+  const [apiURLState, setApiURLState] = useState<string | null>(null);
 
   return (
     <View>
       <TextInput
-        label="Account Identifier"
-        onChangeText={(text: string) => setAccountIdentifierUser(text)}
-        value={accountIdentifierUser || accountIdentifier}
-        defaultValue={accountIdentifier || ''}
+        label="DomainIdentifier (to SDK)"
+        onChangeText={(text: string) => setDomainIdentifierState(text)}
+        value={domainIdentifierState || domainIdentifier}
+        defaultValue={domainIdentifier || ''}
+      />
+      <Spacer />
+
+      <TextInput
+        label="API URL (to RN API calls)"
+        onChangeText={(text: string) => setApiURLState(text)}
+        value={apiURLState || apiURL}
+        defaultValue={apiURL || ''}
+        multiline={true}
       />
       <Spacer />
       <TextInput
-        label="Account Identifier Domain"
-        onChangeText={(text: string) => setAccountIdentifierDomain(text)}
-        value={accountIdentifierDomain || cloudServerUrl}
-        defaultValue={cloudServerUrl || ''}
-      />
-      <Spacer />
-      <TextInput
-        label="Salt Storage"
+        label="Salt Storage (to SDK)"
         onChangeText={(text: string) => setSaltStorageState(text)}
         value={saltStorageState || saltStorage}
         defaultValue={saltStorage || ''}
+        multiline={true}
       />
       <Spacer />
       <TextInput
-        label="Salt Digipass"
+        label="Salt Digipass (to SDK)"
         onChangeText={(text: string) => setSaltDigipassState(text)}
         value={saltDigipassState || saltDigipass}
         defaultValue={saltDigipass || ''}
+        multiline={true}
       />
       <Spacer />
       <Button
         onPress={() =>
-          onSubmit(
-            `${
-              !!accountIdentifierUser
-                ? accountIdentifierUser
-                : accountIdentifier
+          onSubmit({
+            domainIdentifier: `${
+              !!domainIdentifierState ? domainIdentifierState : domainIdentifier
             }`,
 
-            `${
-              !!accountIdentifierDomain
-                ? accountIdentifierDomain
-                : cloudServerUrl
+            apiURL: `${!!apiURLState ? apiURLState : apiURL}`,
+
+            saltStorage: `${
+              !!saltStorageState ? saltStorageState : saltStorage
             }`,
 
-            `${!!saltStorageState ? saltStorageState : saltStorage}`,
-
-            `${!!saltDigipassState ? saltDigipassState : saltDigipass}`
-          )
+            saltDigipass: `${
+              !!saltDigipassState ? saltDigipassState : saltDigipass
+            }`,
+          })
         }
       >
         Config SDK
