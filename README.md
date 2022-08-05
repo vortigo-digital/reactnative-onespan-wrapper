@@ -146,6 +146,7 @@ const onespanRegisterNotification = async () => {
   } while (substring !== 'notificationId');
 };
 ```
+---
 
 ### User Authentication With Push Notifications
 #### Application workflow
