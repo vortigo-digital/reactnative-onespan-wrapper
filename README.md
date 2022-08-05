@@ -147,6 +147,12 @@ const onespanRegisterNotification = async () => {
 };
 ```
 
+### User Authentication With Push Notifications
+#### Application workflow
+
+![Untitled](https://user-images.githubusercontent.com/110695007/183150555-df861d0c-d1ce-41ed-b6c0-031b54a771e3.png)
+
+
 ## **To Check new notifications (can be used on useEffect)**
 
 ```js
