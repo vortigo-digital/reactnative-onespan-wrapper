@@ -200,13 +200,11 @@ const onespanAuthPushNotificationExecute = async (command: string) => {
 };
 ```
 
-````
-
 ## **Send approval command**
 
 ```js
 import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
-````
+```
 
 ```js
 const onespanAuthenticationApproved = async (approved: boolean) => {
