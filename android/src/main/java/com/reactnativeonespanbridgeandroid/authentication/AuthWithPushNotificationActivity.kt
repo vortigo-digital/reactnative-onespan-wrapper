@@ -22,7 +22,7 @@ class AuthWithPushNotificationActivity : ReactActivity() {
   }
 
   private fun checkIntentForNotification(intent: Intent?) {
-    Log.d("FLMWG", "AuthNotificationActivity checkIntentForNotification")
+    Log.d("AuthWithPushNotificationActivity", "AuthNotificationActivity checkIntentForNotification")
 
     try {
       setIntent(null);
@@ -32,7 +32,7 @@ class AuthWithPushNotificationActivity : ReactActivity() {
 
         // get the command from the notification
         val command = NotificationSDKClient.parseVASCONotification(intent)
-        Log.d("FLMWG", "checkIntentForNotification command: $command")
+        Log.d("AuthWithPushNotificationActivity", "checkIntentForNotification command: $command")
 
         OSAuthWithPushNotificationModule.notificationCommand = command
 
@@ -43,11 +43,11 @@ class AuthWithPushNotificationActivity : ReactActivity() {
       }
 
     } catch (e: NotificationSDKClientException) {
-      Log.e("FLMWG", "NotificationSDKClientException in checkIntentForNotification", e)
+      Log.e("AuthWithPushNotificationActivity", "NotificationSDKClientException in checkIntentForNotification", e)
       e.printStackTrace()
 
     }catch (e: ClassNotFoundException) {
-      Log.e("FLMWG", "ClassNotFoundException in checkIntentForNotification", e)
+      Log.e("AuthWithPushNotificationActivity", "ClassNotFoundException in checkIntentForNotification", e)
       e.printStackTrace()
     }
   }

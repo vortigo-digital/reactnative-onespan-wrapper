@@ -25,13 +25,14 @@ class OSAuthWithPushNotificationModule(
   override fun getName() = "OSAuthWithPushNotificationModule"
 
   companion object {
-    var notificationCommand :String? = null
+    var notificationCommand: String? = null
   }
 
   private lateinit var authenticationPromise: Promise
 
   private lateinit var orchestrator: Orchestrator
   private lateinit var remoteAuthDisplayDataCaller: RemoteAuthenticationCallback.DisplayDataCaller
+  private lateinit var inputCallback: UserAuthenticationInputCallback
 
   @ReactMethod
   fun checkNotificationAndExecute(promise: Promise) {
@@ -45,7 +46,7 @@ class OSAuthWithPushNotificationModule(
   }
 
   private fun setOrchestratorAndExecute() {
-    Log.d("FLMWG", "setOrchestratorAndExecute")
+    Log.d(name, "setOrchestratorAndExecute")
 
     try {
       orchestrator = Orchestrator.Builder()
@@ -68,24 +69,29 @@ class OSAuthWithPushNotificationModule(
 
       val command = notificationCommand ?: ""
       notificationCommand = null
-      Log.d("FLMWG", "setOrchestratorAndExecute command: $command")
+
+      Log.d(name, "setOrchestratorAndExecute command: $command")
 
       orchestrator.execute(command)
 
-    }catch (e: Exception) {
-      Log.e("setOrchestratorAndExecute", e.message ?: "")
+    } catch (e: Exception) {
+      Log.e(name, e.message ?: "")
+
+      e.printStackTrace()
       authenticationPromise.reject(e)
     }
   }
 
   override fun onRemoteAuthenticationStepComplete(command: String) {
-    Log.d("FLMWG", "onRemoteAuthenticationStepComplete command: $command")
+    Log.d(name, "onRemoteAuthenticationStepComplete command: $command")
+
     authenticationPromise.resolve(command)
   }
 
   @ReactMethod
   fun execute(command: String, promise: Promise) {
-    Log.d("FLMWG", "execute command: $command")
+    Log.d(name, "execute command: $command")
+
     authenticationPromise = promise
     orchestrator.execute(command)
   }
@@ -94,19 +100,9 @@ class OSAuthWithPushNotificationModule(
     dataToDisplay: String?,
     displayDataCaller: RemoteAuthenticationCallback.DisplayDataCaller?
   ) {
+    Log.d(name, "onRemoteAuthenticationDisplayData dataToDisplay: $dataToDisplay")
+
     displayDataCaller?.let { remoteAuthDisplayDataCaller = it }
-    Log.d("FLMWG", "dataToDisplay: $dataToDisplay")
-
-    /*if (dataToDisplay!!.contains("#")) {
-      // parse data and display the host on which the user wants to connect
-      val host = dataToDisplay.split("#").toTypedArray()[1]
-      val user = dataToDisplay.split("#").toTypedArray()[0]
-
-      Log.d("FLMWG", "dataToDisplay host: $host")
-      Log.d("FLMWG", "dataToDisplay user: $user")
-
-      // send data to front: approved / reject
-    }*/
 
     authenticationPromise.resolve("data:$dataToDisplay")
   }
@@ -128,7 +124,9 @@ class OSAuthWithPushNotificationModule(
       RemoteAuthenticationCallback.SuccessSessionState.Refused -> "You have rejected the request."
       else -> "-"
     }
-    Log.d("FLMWG", "state messageContent: $messageContent")
+
+    Log.d(name, "onRemoteAuthenticationSuccess messageContent: $messageContent")
+
     authenticationPromise.resolve("success:$messageContent")
   }
 
@@ -141,42 +139,57 @@ class OSAuthWithPushNotificationModule(
       else -> ""
     }
 
-    Log.d("FLMWG", "Session outdated: ${reason?.name}")
-    Log.d("FLMWG", "Session outdated: $sessionOutdated")
+    Log.d(name, "onRemoteAuthenticationSessionOutdated Session outdated: ${reason?.name} - $sessionOutdated")
   }
 
   override fun onRemoteAuthenticationAborted() {
-    Log.e("FLMWG", "AuthNotificationActivity, onRemoteAuthenticationAborted")
+    Log.e(name, "onRemoteAuthenticationAborted")
   }
 
   override fun onRemoteAuthenticationPasswordError(passwordError: PasswordError?) {
-    Log.e("FLMWG", "onRemoteAuthenticationPasswordError, ${passwordError?.errorCode}")
+    Log.e(name, "onRemoteAuthenticationPasswordError, ${passwordError?.errorCode}")
+
     authenticationPromise.reject("passwordError", "${passwordError?.errorCode}")
   }
 
+  override fun onUserAuthenticationRequired(
+    type: UserAuthentication?,
+    inputCallback: UserAuthenticationInputCallback,
+    isEnrollment: Boolean
+  ) {
+    Log.d(name, "onUserAuthenticationRequired")
+
+    this.inputCallback = inputCallback
+    authenticationPromise.resolve("pin:required:$isEnrollment")
+  }
+
+  @ReactMethod
+  fun onUserAuthenticationInput(pin: String?, promise: Promise) {
+    Log.d(name, "pin $pin")
+
+    authenticationPromise = promise
+    if (pin.isNullOrEmpty()) inputCallback.onUserAuthenticationInputAborted()
+    else inputCallback.onUserAuthenticationInputSuccess(pin)
+  }
+
+  override fun onUserAuthenticationInputError(error: InputError?) {
+    Log.e(name, "onUserAuthenticationInputError. ${error?.errorCode} / exception: ${error?.inputException}")
+
+    authenticationPromise.reject("passwordError", "${error?.errorCode}")
+  }
+
   override fun onOrchestrationWarning(warning: OrchestrationWarning?) {
-    Log.w("FLMWG", "warning, code:${warning?.warningCode} / exception:${warning?.exception}")
+    Log.w(name, "warning, code:${warning?.warningCode} / exception:${warning?.exception}")
   }
 
   override fun onOrchestrationError(error: OrchestrationError?) {
-    Log.e("FLMWG", "onOrchestrationError, code:${error?.errorCode} / exception:${error?.exception}")
+    Log.e(name, "onOrchestrationError, code:${error?.errorCode} / exception:${error?.exception}")
+
     authenticationPromise.reject("errorCode", "${error?.errorCode}")
   }
 
   override fun onOrchestrationServerError(error: OrchestrationServerError?) {
-    Log.e("FLMWG", "onOrchestrationServerError, customPayload:${error?.customPayload}")
-  }
-
-  override fun onUserAuthenticationRequired(
-    p0: UserAuthentication?,
-    p1: UserAuthenticationInputCallback?,
-    p2: Boolean
-  ) {
-    Log.d("FLMWG", "onUserAuthenticationRequired")
-  }
-
-  override fun onUserAuthenticationInputError(p0: InputError?) {
-    Log.d("FLMWG", "onUserAuthenticationInputError")
+    Log.e(name, "onOrchestrationServerError, customPayload:${error?.customPayload}")
   }
 
 }

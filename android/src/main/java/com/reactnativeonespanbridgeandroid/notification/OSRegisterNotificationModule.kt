@@ -52,11 +52,11 @@ class OSRegisterNotificationModule(
 
         val orchestrationUsers = orchestrator.userManager.users
 
-        Log.d("FLMWG", "OrchestrationUsers: ${orchestrationUsers.size}")
+        Log.d(name, "OrchestrationUsers: ${orchestrationUsers.size}")
 
         for (orchestrationUser in orchestrationUsers) {
 
-          Log.d("FLMWG", "OrchestrationUser: ${orchestrationUser.userIdentifier}")
+          Log.d(name, "OrchestrationUser: ${orchestrationUser.userIdentifier}")
 
           val storedNotificationId = storage.getStorageNotificationIdForUser(orchestrationUser.userIdentifier ?: "")
 
@@ -70,7 +70,7 @@ class OSRegisterNotificationModule(
 
             orchestrator.startNotificationRegistration(notificationRegistrationParams)
 
-            Log.d("FLMWG", "Push notification registration for ${orchestrationUser.userIdentifier}"
+            Log.d(name, "Push notification registration for ${orchestrationUser.userIdentifier}"
             )
           }
         }
@@ -78,6 +78,7 @@ class OSRegisterNotificationModule(
 
       override fun onException(e: NotificationSDKClientException) {
         Log.e(name, "Exception when retrieving notification Id: errorCode ${e.errorCode}", e)
+
         notificationPromise.reject("errorCode", "Exception when retrieving notification Id: errorCode ${e.errorCode}")
       }
     }
@@ -87,6 +88,7 @@ class OSRegisterNotificationModule(
 
   override fun onNotificationRegistrationStepComplete(command: String?) {
     Log.d(name, "onNotificationRegistrationStepComplete / command: $command")
+
     notificationPromise.resolve(command)
   }
 
@@ -107,6 +109,7 @@ class OSRegisterNotificationModule(
   @ReactMethod
   fun execute(command: String, promise: Promise) {
     Log.d("FLMWG", "execute command: $command")
+
     notificationPromise = promise
     orchestrator.execute(command)
   }
@@ -118,10 +121,12 @@ class OSRegisterNotificationModule(
 
   override fun onOrchestrationError(error: OrchestrationError?) {
     Log.e(name, "onOrchestrationError, code:${error?.errorCode} / exception:${error?.exception}")
+
     notificationPromise.reject("errorCode", "${error?.errorCode}")
   }
 
   override fun onOrchestrationServerError(error: OrchestrationServerError?) {
     Log.e(name, "onOrchestrationServerError, customPayload:${error?.customPayload}")
   }
+
 }

@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
+
 import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
+
+import { NativeModules } from 'react-native';
+
+const {
+  OSSettingsModule,
+  OSActivationModule,
+  OSRegisterNotificationModule,
+  OSAuthWithPushNotificationModule,
+} = NativeModules;
 
 import { ActivityIndicator } from 'react-native';
 // import { executeAPICommand } from '../apiUtils';
@@ -55,13 +65,18 @@ const App = () => {
     saltDigipass: string;
   };
 
+  const [loginConfirmationIsVisible, showLoginConfirmationIsVisible] =
+    useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [isActivated, setIsActivated] = useState(false);
   const [isConfigured, setIsConfigured] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [commands, setCommands] = useState<string[]>([]);
   const [history, setHistory] = useState<string[]>([]);
 
   const [currentStep, setCurrentStep] = useState<currentStepTypes | string>(
-    'configureApp'
+    'registerUser'
   );
   const [config, setConfig] = useState<configurationTypes>(initialConfig);
 
@@ -78,19 +93,15 @@ const App = () => {
   };
 
   const resetState = () => {
+    setIsSignedIn(false);
     setCommands([]);
     setIsConfigured(false);
-    setCurrentStep('configureApp');
     setConfig(initialConfig);
     setActivationPassword(null);
     setIsLoading(false);
     cleanMessages();
     setHistory([]);
   };
-
-  useEffect(() => {
-    resetState();
-  }, []);
 
   /////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////
@@ -121,6 +132,20 @@ const App = () => {
   // Step 1 - Config SDK
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////
+  const defaultConfigSDK = async () => {
+    try {
+      const response = await OnespanWrapper.config(
+        initialConfig.domainIdentifier,
+        initialConfig.saltStorage,
+        initialConfig.saltDigipass
+      );
+      // if (response.status === 'success') {
+      checkNotifications();
+      // }
+    } catch (e) {
+      console.log(e);
+    }
+  };
   type configProps = {
     apiURL: string;
     domainIdentifier: string;
@@ -133,8 +158,12 @@ const App = () => {
     saltStorage,
     saltDigipass,
   }: configProps) => {
+    if (isConfigured) {
+      goToNextStep();
+    }
     cleanMessages();
     setIsLoading(true);
+
     try {
       setConfig({
         ...config,
@@ -151,11 +180,10 @@ const App = () => {
       );
 
       console.log(response);
-
+      checkNotifications();
       setSuccess(`${response}`);
       setIsConfigured(true);
       setIsLoading(false);
-      checkNotifications();
       goToNextStep();
     } catch (err) {
       setError(`${err}`);
@@ -173,6 +201,9 @@ const App = () => {
     userIdentifier: string,
     staticPassword: string
   ) => {
+    if (isRegistered) {
+      goToNextStep();
+    }
     cleanMessages();
     setIsLoading(true);
     await setConfig({
@@ -188,6 +219,7 @@ const App = () => {
 
     await setActivationPassword(activationPassword);
     setSuccess(`Generated activation password: ${activationPassword}`);
+    setIsRegistered(true);
     goToNextStep();
     setIsLoading(false);
     return activationPassword;
@@ -204,6 +236,9 @@ const App = () => {
     activationPassword: string
   ) => {
     try {
+      if (isActivated) {
+        goToNextStep();
+      }
       cleanMessages();
       setCommands([]);
       setIsLoading(true);
@@ -288,7 +323,7 @@ const App = () => {
       } while (sdkResponse !== 'success');
 
       await setCommands((commands) => [...commands, `Sucesso`]);
-
+      setIsActivated(true);
       setIsLoading(false);
       goToNextStep();
 
@@ -405,7 +440,7 @@ const App = () => {
       // promisse for a command or ""
       console.log(`checkNotificationsAndExecute ${response}`);
 
-      if (response != '') {
+      if (response !== '') {
         // request to /v1/orchestration-commands OCA
         const apiResponseCommand = await executeAPICommand(response);
 
@@ -419,6 +454,20 @@ const App = () => {
       console.error(e);
     }
   };
+
+  // const handleLoginConfirmation = async () => {
+  //   if(loginConfirmationIsVisible){
+  //     setLoginConfirmationIsVisible(false);
+  //     return;
+  //   }
+  //   else{
+  //     setLoginConfirmationIsVisible(true);
+  //     return;
+
+  //   }
+  //   onespanAuthenticationApproved(true);
+
+  // }
 
   const onespanAuthPushNotificationExecute = async (command: string) => {
     try {
@@ -437,8 +486,11 @@ const App = () => {
         // display host and user wants to connect
         // then accept or reject the authentication
         // this example accepted authentication (true)
-        onespanAuthenticationApproved(true);
+        // onespanAuthenticationApproved(true);
+        showLoginConfirmationIsVisible(true);
       } else if (splitString[0] == 'success') {
+        showLoginConfirmationIsVisible(false);
+        setIsSignedIn(true);
         console.log(`Authentication With Push Notification: ${splitString[1]}`);
       } else {
         // request to /v1/orchestration-commands OCA
@@ -451,20 +503,19 @@ const App = () => {
         }
       }
     } catch (e) {
-      console.error(e);
+      console.log(e);
     }
   };
 
-  const onespanAuthenticationApproved = async (approved: boolean) => {
+  async function onespanAuthenticationApproved(approved: boolean) {
     /*
-       OSAuthWithPushNotificationModule.authenticationApproved
-       params:
-       approved: boolean
-     */
+      OSAuthWithPushNotificationModule.authenticationApproved
+      params:
+      approved: boolean
+    */
     try {
-      const response = await OnespanWrapper.pushNotification.isApproved(
-        approved
-      );
+      const response =
+        await OSAuthWithPushNotificationModule.authenticationApproved(approved);
 
       // promisse for a command
       console.log(`authenticationApproved ${response}`);
@@ -482,7 +533,37 @@ const App = () => {
     } catch (e) {
       console.error(e);
     }
-  };
+  }
+
+  // const onespanAuthenticationApproved = async (approved: boolean) => {
+  //   /*
+  //      OSAuthWithPushNotificationModule.authenticationApproved
+  //      params:
+  //      approved: boolean
+  //    */
+  //   console.log(`onespanAuthenticationApproved ${approved}`);
+  //   try {
+  //     const response = await OnespanWrapper.pushNotification.isApproved(
+  //       approved
+  //     );
+
+  //     // promisse for a command
+  //     console.log(`authenticationApproved ${response}`);
+
+  //     if (response !== '') {
+  //       // request to /v1/orchestration-commands OCA
+  //       const apiResponseCommand = await executeAPICommand(response);
+
+  //       if (apiResponseCommand) {
+  //         // send command to orchestrationSDK.execute
+  //         console.log(`apiResponseCommand: ${apiResponseCommand}`);
+  //         onespanAuthPushNotificationExecute(apiResponseCommand);
+  //       }
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
 
   const ScreenTitle = () => {
     switch (currentStep) {
@@ -609,44 +690,101 @@ const App = () => {
     }
   };
 
+  // const handleLogin = async (confirmLogin: boolean) => {
+  //   onespanAuthenticationApproved(confirmLogin);
+  // };
+
+  // // return (
+  //   <Container>
+  //     <Text>Ok</Text>
+  //   </Container>
+  // );
+
+  const configureSDK = async () => {
+    console.log({
+      configureSDK: {
+        domainIdentifier: config.domainIdentifier,
+        saltStorage: config.saltStorage,
+        saltDigipass: config.saltDigipass,
+      },
+    });
+    const configresult = await OnespanWrapper.config(
+      config.domainIdentifier,
+      config.saltStorage,
+      config.saltDigipass
+    );
+    console.log({ configresult });
+  };
+
+  const initApp = async () => {
+    // await unassignUsers();
+    await resetState();
+    await configureSDK();
+    checkNotifications();
+  };
+
   useEffect(() => {
-    if (isConfigured) {
-      checkNotifications();
-    }
+    initApp();
   }, []);
 
   return (
     <Container>
-      <ScreenTitle />
-
-      {!!history && history.length > 0 && (
-        <InfoBox>
-          <InfoText>{history[history.length - 1]}</InfoText>
-        </InfoBox>
-      )}
-
-      {!!error && (
-        <ErrorBox>
-          <ErrorText>{error}</ErrorText>
-        </ErrorBox>
-      )}
-      {!!success && (
-        <SuccessBox>
-          <SuccessText>{success}</SuccessText>
-        </SuccessBox>
-      )}
-      {!!commands && commands.length > 0 && (
+      {loginConfirmationIsVisible ? (
+        <View>
+          <Text style={{ color: '#000000' }}>Are you trying to log in?</Text>
+          <View style={{ flex: 1, flexDirection: 'row', marginTop: 30 }}>
+            <Button
+              style={{ backgroundColor: 'green', width: 150 }}
+              onPress={() => onespanAuthenticationApproved(true)}
+            >
+              Yes
+            </Button>
+            <Button
+              style={{ width: 150, marginLeft: 10 }}
+              onPress={() => onespanAuthenticationApproved(false)}
+            >
+              No
+            </Button>
+          </View>
+        </View>
+      ) : isSignedIn ? (
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text style={{ color: '#000000' }}>Login concluido</Text>
+        </View>
+      ) : (
         <>
-          {commands.map((command, index) => (
-            <SuccessBox key={`command-${index}`}>
-              <SuccessText numberOfLines={2}>{command}</SuccessText>
+          <ScreenTitle />
+          {!!history && history.length > 0 && (
+            <InfoBox>
+              <InfoText>{history[history.length - 1]}</InfoText>
+            </InfoBox>
+          )}
+          {!!error && (
+            <ErrorBox>
+              <ErrorText>{error}</ErrorText>
+            </ErrorBox>
+          )}
+          {!!success && (
+            <SuccessBox>
+              <SuccessText>{success}</SuccessText>
             </SuccessBox>
-          ))}
+          )}
+          {!!commands && commands.length > 0 && (
+            <>
+              {commands.map((command, index) => (
+                <SuccessBox key={`command-${index}`}>
+                  <SuccessText numberOfLines={1}>{command}</SuccessText>
+                </SuccessBox>
+              ))}
+            </>
+          )}
+          <FormWrapper>
+            {isLoading ? <ActivityIndicator /> : <MainContent />}
+          </FormWrapper>
         </>
       )}
-      <FormWrapper>
-        {isLoading ? <ActivityIndicator /> : <MainContent />}
-      </FormWrapper>
     </Container>
   );
 };

@@ -4,7 +4,7 @@ const initialConfig = {
   userRegisterURL: `https://sybrandreinders-vort.sdb.tid.onespan.cloud/v1/users/register`,
   commandsURL: `https://sybrandreinders-vort.sdb.tid.onespan.cloud/v1/orchestration-commands`,
   domainIdentifier: 'sybrandreinders-vort',
-  userIdentifier: 'userid1',
+  userIdentifier: 'arthur96',
   staticPassword: 'Test1234',
   saltStorage:
     '38af4675075cb1971a5fe79d59e702d711577b40a6e06ab75696bbd4aaddebdc',

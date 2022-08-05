@@ -3,14 +3,16 @@ import { Button as BT, TextInput as TI } from 'react-native-paper';
 
 export const Container = styled.ScrollView.attrs({
   contentContainerStyle: {
-    flex: 1,
+    // flex: 1,
     padding: 30,
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: '#f8f8f6',
+    // height: '100%',
   },
 })`
   flex: 1;
+  background-color: #f8f8f6;
 `;
 export const Spacer = styled.View`
   width: 100%;

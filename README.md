@@ -200,21 +200,30 @@ const onespanAuthPushNotificationExecute = async (command: string) => {
 };
 ```
 
+````
+
 ## **Send approval command**
 
 ```js
 import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
-```
+````
 
 ```js
 const onespanAuthenticationApproved = async (approved: boolean) => {
   try {
     const response = await OnespanWrapper.pushNotification.isApproved(approved);
-
-    if (response != '') {
+    let splitString = response.split(':');
+    if (splitString[0] == 'pin') {
+      // you can call the pin screen here
+      // the pin screen should call a function
+      // onespanOnUserAuthenticationInput passing the pin
+      // onespanOnUserAuthenticationInput(pin);
+    } else {
+      // request to /v1/orchestration-commands OCA
       const apiResponseCommand = await executeAPICommand(response);
 
       if (apiResponseCommand) {
+        // send command to orchestrationSDK.execute
         onespanAuthPushNotificationExecute(apiResponseCommand);
       }
     }
@@ -222,4 +231,33 @@ const onespanAuthenticationApproved = async (approved: boolean) => {
     console.error(e);
   }
 };
+```
+
+## **Notification - Auth with PIN**
+
+```js
+import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
+```
+
+```js
+const authWithPinResponse = await OnespanWrapper.pushNotification.authWithPin(
+  pin
+);
+```
+
+```js
+async function onespanOnUserAuthenticationInput(pin: string) {
+  // if user aborted authentication - send "" or send pin for auth
+  const response = await OnespanWrapper.pushNotification.authWithPin(pin);
+
+  if (response) {
+    // request to /v1/orchestration-commands OCA
+    const apiResponseCommand = await executeAPICommand(response);
+
+    if (apiResponseCommand) {
+      // send command to orchestrationSDK.execute
+      onespanAuthPushNotificationExecute(apiResponseCommand);
+    }
+  }
+}
 ```

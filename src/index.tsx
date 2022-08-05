@@ -62,6 +62,10 @@ function pushNotificationIsApproved(approved: string): Promise<string> {
   return OSAuthWithPushNotificationModule.authenticationApproved(approved);
 }
 
+function onUserAuthenticationInput(pin: string): Promise<string> {
+  return OSAuthWithPushNotificationModule.onUserAuthenticationInput(pin);
+}
+
 export default {
   config,
   activate,
@@ -74,5 +78,6 @@ export default {
     execute: pushNotificationExecute,
     checkAndExecute: pushNotificationCheckAndExecute,
     isApproved: pushNotificationIsApproved,
+    authWithPin: onUserAuthenticationInput,
   },
 };

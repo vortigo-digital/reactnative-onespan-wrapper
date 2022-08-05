@@ -10,8 +10,6 @@ import com.reactnativeonespanbridgeandroid.settings.SessionHelper
 import com.reactnativeonespanbridgeandroid.utils.CDDCUtils
 import com.reactnativeonespanbridgeandroid.utils.SharedPreferencesStorage
 import com.vasco.orchestration.client.Orchestrator
-import com.vasco.orchestration.client.authentication.UserAuthenticationCallback
-import com.vasco.orchestration.client.authentication.UserAuthenticationInputCallback
 import com.vasco.orchestration.client.errors.*
 import com.vasco.orchestration.client.flows.activation.online.OnlineActivationCallback
 import com.vasco.orchestration.client.flows.activation.online.OnlineActivationInputError
@@ -23,7 +21,6 @@ class OSActivationModule(
   private val reactContext: ReactApplicationContext
 ) : ReactContextBaseJavaModule(reactContext),
   OnlineActivationCallback,
-  UserAuthenticationCallback,
   OrchestrationWarningCallback,
   OrchestrationErrorCallback {
 
@@ -69,61 +66,52 @@ class OSActivationModule(
 
   override fun onActivationSuccess() {
     Log.d(name, "onActivationSuccess")
+
     storage.setCurrentUser(userID)
     activationPromise.resolve("success")
   }
 
   override fun onActivationInputError(error: OnlineActivationInputError?) {
     Log.e(name, "onActivationInputError code: ${error?.errorCode}")
+
     activationPromise.reject("errorCode", "${error?.errorCode}")
   }
 
   override fun onActivationAborted() {
     Log.e(name, "onActivationAborted")
+
     activationPromise.reject("onActivationAborted", "onActivationAborted")
   }
 
   override fun onActivationStepComplete(command: String?) {
     Log.d(name, "onActivationStepComplete / command: $command")
+
     activationPromise.resolve(command)
   }
 
   @ReactMethod
   fun execute(command: String, promise: Promise) {
-    Log.d("FLMWG", "execute command: $command")
+    Log.d(name, "execute command: $command")
+
     activationPromise = promise
     orchestrator.execute(command)
   }
 
-  // orchestration callbacks
-  override fun onUserAuthenticationRequired(
-    type: UserAuthenticationCallback.UserAuthentication?,
-    inputCallback: UserAuthenticationInputCallback?,
-    isEnrollment: Boolean
-  ) {
-    Log.d(name, "user type name: " + type?.name)
-    Log.d(name, "user isEnrollment: $isEnrollment")
-
-    inputCallback?.onUserAuthenticationInputSuccess("xxx")
-  }
-
-  override fun onUserAuthenticationInputError(error: InputError?) {
-    Log.e(name, "input error: ", error?.inputException)
-    activationPromise.reject("errorCode", "${error?.errorCode}")
-  }
-
   override fun onOrchestrationWarning(warning: OrchestrationWarning?) {
     Log.w(name, "onOrchestrationWarning, code:${warning?.warningCode} / exception:${warning?.exception}")
-//    activationPromise.reject("warningCode", "${warning?.warningCode}")
+
+    //    activationPromise.reject("warningCode", "${warning?.warningCode}")
   }
 
   override fun onOrchestrationError(error: OrchestrationError?) {
     Log.e(name, "onOrchestrationError, code:${error?.errorCode} / exception:${error?.exception}")
+
     activationPromise.reject("errorCode", "${error?.errorCode}")
   }
 
   override fun onOrchestrationServerError(error: OrchestrationServerError?) {
     Log.e(name, "onOrchestrationServerError, customPayload:${error?.readableMessage}")
-//    activationPromise.reject("serverError", "${error?.customPayload}")
+
+    //    activationPromise.reject("serverError", "${error?.customPayload}")
   }
 }
