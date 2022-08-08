@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { View, TextInput, Spacer, Button } from './styles';
 
@@ -20,32 +20,28 @@ const ActivationForm = ({
     string | null
   >(null);
 
+  useEffect(() => {
+    setUserIdentifierState(userIdentifier);
+    setActivationPasswordState(activationPassword);
+  }, [userIdentifier, activationPassword]);
+
   return (
     <View>
       <TextInput
         label="User Identifier"
         onChangeText={(text: string) => setUserIdentifierState(text)}
-        value={userIdentifierState || userIdentifier}
-        defaultValue={userIdentifier || ''}
+        value={userIdentifierState}
       />
       <Spacer />
       <TextInput
         label="Activation Password"
         onChangeText={(text: string) => setActivationPasswordState(text)}
-        value={activationPasswordState || activationPassword}
-        defaultValue={activationPassword || ''}
+        value={activationPasswordState}
       />
       <Spacer />
       <Button
         onPress={() =>
-          onSubmit(
-            `${!!userIdentifierState ? userIdentifierState : userIdentifier}`,
-            `${
-              !!activationPasswordState
-                ? activationPasswordState
-                : activationPassword
-            }`
-          )
+          onSubmit(`${userIdentifierState}`, `${activationPasswordState}`)
         }
       >
         Activate

@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
-
 import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
-
-import { NativeModules } from 'react-native';
-
-const {
-  OSSettingsModule,
-  OSActivationModule,
-  OSRegisterNotificationModule,
-  OSAuthWithPushNotificationModule,
-} = NativeModules;
-
 import { ActivityIndicator } from 'react-native';
-// import { executeAPICommand } from '../apiUtils';
 
 import {
   Container,
@@ -37,16 +25,11 @@ import {
   FormPIN,
 } from '../components';
 
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
 import { advanceStep } from '../utils/APP';
-import {
-  registerUserOnAPI,
-  executeAPICommand,
-  unassignUsers,
-} from '../utils/API';
+import { registerUserOnAPI, executeAPICommand } from '../utils/API';
 import initialConfig from '../config/initialConfig';
 /////////////////////////////////////////////////////////////////////////
+// DEMO APP
 /////////////////////////////////////////////////////////////////////////
 
 const App = () => {
@@ -70,6 +53,9 @@ const App = () => {
     saltDigipass: string;
   };
 
+  /////////////////////////////////////////////////////////////////////////
+  // DEMO APP - Local states
+  /////////////////////////////////////////////////////////////////////////
   const [loginConfirmationIsVisible, showLoginConfirmationIsVisible] =
     useState(false);
   const [loading, setLoading] = useState(false);
@@ -81,18 +67,19 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [commands, setCommands] = useState<string[]>([]);
   const [history, setHistory] = useState<string[]>([]);
-
   const [currentStep, setCurrentStep] = useState<currentStepTypes | string>(
     'registerUser'
   );
   const [config, setConfig] = useState<configurationTypes>(initialConfig);
-
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [activationPassword, setActivationPassword] = useState<string | null>(
     null
   );
 
+  /////////////////////////////////////////////////////////////////////////
+  // DEMO APP - helper functions
+  /////////////////////////////////////////////////////////////////////////
   const cleanMessages = () => {
     setError(null);
     setSuccess(null);
@@ -111,100 +98,15 @@ const App = () => {
     setHistory([]);
   };
 
-  /////////////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////////
   const goToNextStep = () => {
     const nextStep = advanceStep(currentStep);
     setCurrentStep(`${nextStep}`);
-  };
-
-  /////////////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////////////
-
-  const handleError = async (e: any, functionName = '') => {
-    // const errorAsString = await convertErrorCodeToString(e);
-    const errorMessage = `${
-      functionName !== '' ? ` ${functionName}: ` : ''
-    } ${e}`;
-    console.log(errorMessage);
-    setIsLoading(false);
-    setError(errorMessage);
   };
 
   const addLog = (str: string, origin?: string) => {
     console.log(`${origin ? `${origin}: ` : ''}${str}`);
   };
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  // Step 1 - Config SDK
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  const defaultConfigSDK = async () => {
-    try {
-      const response = await OnespanWrapper.config(
-        initialConfig.domainIdentifier,
-        initialConfig.saltStorage,
-        initialConfig.saltDigipass
-      );
-      // if (response.status === 'success') {
-      checkNotifications();
-      // }
-    } catch (e) {
-      console.log(e);
-    }
-  };
-  type configProps = {
-    apiURL: string;
-    domainIdentifier: string;
-    saltStorage: string;
-    saltDigipass: string;
-  };
-  const configSDK = async ({
-    apiURL,
-    domainIdentifier,
-    saltStorage,
-    saltDigipass,
-  }: configProps) => {
-    if (isConfigured) {
-      goToNextStep();
-    }
-    cleanMessages();
-    setIsLoading(true);
-
-    try {
-      setConfig({
-        ...config,
-        apiURL,
-        domainIdentifier,
-        saltStorage,
-        saltDigipass,
-      });
-
-      const response = await OnespanWrapper.config(
-        domainIdentifier,
-        saltStorage,
-        saltDigipass
-      );
-
-      console.log(response);
-      checkNotifications();
-      setSuccess(`${response}`);
-      setIsConfigured(true);
-      setIsLoading(false);
-      goToNextStep();
-    } catch (err) {
-      setError(`${err}`);
-      setIsLoading(false);
-      // goToNextStep();
-    }
-  };
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  // Step 2 - Register user on API
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
   const registerUser = async (
     userIdentifier: string,
     staticPassword: string
@@ -235,10 +137,26 @@ const App = () => {
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////
-  // Step 3 - Activate user on SDK
+  //
+  //                                        OnespanWrapper
+  //
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  // Config SDK
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  const configureSDK = async () => {
+    const result = await OnespanWrapper.config(
+      config.domainIdentifier,
+      config.saltStorage,
+      config.saltDigipass
+    );
+    return result;
+  };
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  // Activate User
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
   const activateUser = async (
     userIdentifier: string,
     activationPassword: string
@@ -250,54 +168,6 @@ const App = () => {
       cleanMessages();
       setCommands([]);
       setIsLoading(true);
-      // addLog('Activating user on SDK');
-      // const command = await OnespanWrapper.activate(
-      //   userIdentifier,
-      //   activationPassword
-      // );
-
-      // /////////////// Logs //////////////////////
-
-      // await setCommands((commands) => [
-      //   ...commands,
-      //   `SDK response:  ${command}`,
-      // ]);
-      // addLog('Sending command to API');
-      // //////////////////////////////////////////////
-
-      // const apiResponseCommand = await executeAPICommand(command);
-
-      // /////////////// Logs //////////////////////
-      // await setCommands((commands) => [
-      //   ...commands,
-      //   `API Response:  ${apiResponseCommand}`,
-      // ]);
-      // addLog('Looping untils success');
-      // //////////////////////////////////////////////
-
-      // let response = '';
-      // let apiCommand = apiResponseCommand;
-      // do {
-      //   addLog('Sending command to SDK');
-      //   response = await OnespanWrapper.execute(apiCommand);
-      //   /////////////// Logs //////////////////////
-      //   await setCommands((commands) => [
-      //     ...commands,
-      //     `SDK Response:  ${response}`,
-      //   ]);
-
-      //   if (response !== 'success') {
-      //     addLog('Sending command to API');
-      //     apiCommand = await executeAPICommand(response);
-
-      //     /////////////// Logs //////////////////////
-      //     await setCommands((commands) => [
-      //       ...commands,
-      //       `API Response:  ${apiCommand}`,
-      //     ]);
-      //   }
-      // } while (response !== 'success');
-
       let sdkResponse = '';
       let apiResponse = '';
       sdkResponse = await OnespanWrapper.activate(
@@ -344,9 +214,7 @@ const App = () => {
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  // Step 4 - Register Notification
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  // Register Notification
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   const onespanRegisterNotification = async () => {
     cleanMessages();
@@ -434,13 +302,8 @@ const App = () => {
     }
   };
   ///////////////////////////////////////////////////////////////////////////////////////////////////
+  // Push Notification Methods
   ///////////////////////////////////////////////////////////////////////////////////////////////////
-  // Push Notifications
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-  // ------- authentication with push notification -------
-
   const checkNotifications = async () => {
     try {
       const response = await OnespanWrapper.pushNotification.checkAndExecute();
@@ -462,20 +325,6 @@ const App = () => {
       console.error(e);
     }
   };
-
-  // const handleLoginConfirmation = async () => {
-  //   if(loginConfirmationIsVisible){
-  //     setLoginConfirmationIsVisible(false);
-  //     return;
-  //   }
-  //   else{
-  //     setLoginConfirmationIsVisible(true);
-  //     return;
-
-  //   }
-  //   onespanAuthenticationApproved(true);
-
-  // }
 
   const onespanAuthPushNotificationExecute = async (command: string) => {
     try {
@@ -564,40 +413,34 @@ const App = () => {
         // send command to orchestrationSDK.execute
         console.log(`apiResponseCommand: ${apiResponseCommand}`);
         onespanAuthPushNotificationExecute(apiResponseCommand);
+        return true;
       }
     }
+    return false;
   }
 
-  // const onespanAuthenticationApproved = async (approved: boolean) => {
-  //   /*
-  //      OSAuthWithPushNotificationModule.authenticationApproved
-  //      params:
-  //      approved: boolean
-  //    */
-  //   console.log(`onespanAuthenticationApproved ${approved}`);
-  //   try {
-  //     const response = await OnespanWrapper.pushNotification.isApproved(
-  //       approved
-  //     );
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  // Push Notification Methods
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  const initApp = async () => {
+    setLoading(true); // DEMO APP
+    await resetState(); // DEMO APP
+    await configureSDK(); //////////////////// SDK ////////////////////
+    await checkNotifications(); //////////////////// SDK ////////////////////
+    setLoading(false); // DEMO APP
+  };
 
-  //     // promisse for a command
-  //     console.log(`authenticationApproved ${response}`);
+  useEffect(() => {
+    initApp();
+  }, []);
 
-  //     if (response !== '') {
-  //       // request to /v1/orchestration-commands OCA
-  //       const apiResponseCommand = await executeAPICommand(response);
-
-  //       if (apiResponseCommand) {
-  //         // send command to orchestrationSDK.execute
-  //         console.log(`apiResponseCommand: ${apiResponseCommand}`);
-  //         onespanAuthPushNotificationExecute(apiResponseCommand);
-  //       }
-  //     }
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
-
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  //
+  //                                        Screen Components
+  //
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
   const ScreenTitle = () => {
     switch (currentStep) {
       case 'configureApp':
@@ -722,46 +565,6 @@ const App = () => {
         return <View />;
     }
   };
-
-  // const handleLogin = async (confirmLogin: boolean) => {
-  //   onespanAuthenticationApproved(confirmLogin);
-  // };
-
-  // // return (
-  //   <Container>
-  //     <Text>Ok</Text>
-  //   </Container>
-  // );
-
-  const configureSDK = async () => {
-    console.log({
-      configureSDK: {
-        domainIdentifier: config.domainIdentifier,
-        saltStorage: config.saltStorage,
-        saltDigipass: config.saltDigipass,
-      },
-    });
-    const configresult = await OnespanWrapper.config(
-      config.domainIdentifier,
-      config.saltStorage,
-      config.saltDigipass
-    );
-    console.log({ configresult });
-  };
-
-  const initApp = async () => {
-    // await unassignUsers();
-    setLoading(true);
-    await resetState();
-    await configureSDK();
-    await checkNotifications();
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    initApp();
-  }, []);
-
   return (
     <Container>
       {loading ? (

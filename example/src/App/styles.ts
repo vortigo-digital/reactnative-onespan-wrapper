@@ -10,6 +10,7 @@ export const Container = styled.ScrollView.attrs({
     backgroundColor: '#f8f8f6',
     // height: '100%',
   },
+  keyboardShouldPersistTaps: 'handled',
 })`
   flex: 1;
   background-color: #f8f8f6;

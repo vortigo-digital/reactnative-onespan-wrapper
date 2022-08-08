@@ -11,6 +11,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@haskkor/react-native-pincode": "^1.22.6",
     "axios": "^0.27.2",
     "react": "17.0.2",
     "react-hook-form": "^7.33.1",

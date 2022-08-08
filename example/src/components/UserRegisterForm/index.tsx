@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { View, TextInput, Spacer, Button } from './styles';
 
@@ -20,28 +20,27 @@ const UserRegisterForm = ({
     null
   );
 
+  useEffect(() => {
+    setUserIdentifierState(userIdentifier);
+    setStaticPasswordState(staticPassword);
+  }, [userIdentifier, staticPassword]);
   return (
     <View>
       <TextInput
         label="User Identifier"
         onChangeText={(text: string) => setUserIdentifierState(text)}
-        value={userIdentifierState || userIdentifier}
-        defaultValue={userIdentifier || ''}
+        value={userIdentifierState}
       />
       <Spacer />
       <TextInput
         label="Static Password"
         onChangeText={(text: string) => setStaticPasswordState(text)}
-        value={staticPasswordState || staticPassword}
-        defaultValue={staticPassword || ''}
+        value={staticPasswordState}
       />
       <Spacer />
       <Button
         onPress={() =>
-          onSubmit(
-            `${!!userIdentifierState ? userIdentifierState : userIdentifier}`,
-            `${!!staticPasswordState ? staticPasswordState : staticPassword}`
-          )
+          onSubmit(`${userIdentifierState}`, `${staticPasswordState}`)
         }
       >
         Register User

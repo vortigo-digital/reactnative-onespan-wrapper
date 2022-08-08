@@ -13,7 +13,9 @@ export const Spacer = styled.View`
   height: 5px;
 `;
 
-export const Eventbox = styled.ScrollView`
+export const Eventbox = styled.ScrollView.attrs({
+  keyboardShouldPersistTaps: 'handled',
+})`
   background-color: #000000;
   margin-bottom: 10px;
   min-height: 200px;
