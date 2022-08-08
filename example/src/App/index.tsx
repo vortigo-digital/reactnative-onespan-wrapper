@@ -30,7 +30,12 @@ import {
   InfoBox,
   InfoText,
 } from './styles';
-import { ActivationForm, ConfigForm, UserRegisterForm } from '../components';
+import {
+  ActivationForm,
+  ConfigForm,
+  UserRegisterForm,
+  FormPIN,
+} from '../components';
 
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
@@ -67,6 +72,8 @@ const App = () => {
 
   const [loginConfirmationIsVisible, showLoginConfirmationIsVisible] =
     useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showPIN, setShowPIN] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
@@ -93,6 +100,7 @@ const App = () => {
   };
 
   const resetState = () => {
+    setShowPIN(false);
     setIsSignedIn(false);
     setCommands([]);
     setIsConfigured(false);
@@ -491,6 +499,7 @@ const App = () => {
       } else if (splitString[0] == 'success') {
         showLoginConfirmationIsVisible(false);
         setIsSignedIn(true);
+        setShowPIN(false);
         console.log(`Authentication With Push Notification: ${splitString[1]}`);
       } else {
         // request to /v1/orchestration-commands OCA
@@ -509,18 +518,23 @@ const App = () => {
 
   async function onespanAuthenticationApproved(approved: boolean) {
     /*
-      OSAuthWithPushNotificationModule.authenticationApproved
-      params:
-      approved: boolean
-    */
+       OSAuthWithPushNotificationModule.authenticationApproved
+       params:
+       approved: boolean
+     */
     try {
-      const response =
-        await OSAuthWithPushNotificationModule.authenticationApproved(approved);
+      const response = await OnespanWrapper.pushNotification.isApproved(
+        approved
+      );
 
-      // promisse for a command
+      // promisse for a pin(required) or command
       console.log(`authenticationApproved ${response}`);
+      let splitString = response.split(':');
 
-      if (response != '') {
+      if (splitString[0] == 'pin') {
+        // create a view with password field
+        setShowPIN(true);
+      } else {
         // request to /v1/orchestration-commands OCA
         const apiResponseCommand = await executeAPICommand(response);
 
@@ -532,6 +546,25 @@ const App = () => {
       }
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  async function onespanOnUserAuthenticationInput(pin: string) {
+    // if user aborted authentication - send "" or send pin for auth
+    const response = await OnespanWrapper.pushNotification.authWithPin(pin);
+
+    // promisse for a command
+    console.log(`onUserAuthenticationInput ${response}`);
+
+    if (response) {
+      // request to /v1/orchestration-commands OCA
+      const apiResponseCommand = await executeAPICommand(response);
+
+      if (apiResponseCommand) {
+        // send command to orchestrationSDK.execute
+        console.log(`apiResponseCommand: ${apiResponseCommand}`);
+        onespanAuthPushNotificationExecute(apiResponseCommand);
+      }
     }
   }
 
@@ -718,9 +751,11 @@ const App = () => {
 
   const initApp = async () => {
     // await unassignUsers();
+    setLoading(true);
     await resetState();
     await configureSDK();
-    checkNotifications();
+    await checkNotifications();
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -729,7 +764,11 @@ const App = () => {
 
   return (
     <Container>
-      {loginConfirmationIsVisible ? (
+      {loading ? (
+        <ActivityIndicator />
+      ) : showPIN ? (
+        <FormPIN onSubmit={onespanOnUserAuthenticationInput} />
+      ) : loginConfirmationIsVisible ? (
         <View>
           <Text style={{ color: '#000000' }}>Are you trying to log in?</Text>
           <View style={{ flex: 1, flexDirection: 'row', marginTop: 30 }}>

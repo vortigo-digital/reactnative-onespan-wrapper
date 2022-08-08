@@ -7,8 +7,10 @@ import ExecuteNotificationForm from './ExecuteNotificationForm';
 import UserRegisterForm from './UserRegisterForm';
 import ScreenTitle from './ScreenTitle';
 import MainContent from './MainContent';
+import FormPIN from './FormPIN';
 
 export {
+  FormPIN,
   UserRegisterForm,
   ActivationForm,
   IdentifierForm,
