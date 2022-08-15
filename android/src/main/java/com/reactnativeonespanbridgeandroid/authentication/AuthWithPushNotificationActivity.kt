@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import com.facebook.react.ReactActivity
+import com.reactnativeonespanbridgeandroid.utils.SharedPreferencesStorage
 import com.vasco.digipass.sdk.utils.notification.client.NotificationSDKClient
 import com.vasco.digipass.sdk.utils.notification.client.exceptions.NotificationSDKClientException
 
@@ -23,6 +24,7 @@ class AuthWithPushNotificationActivity : ReactActivity() {
 
   private fun checkIntentForNotification(intent: Intent?) {
     Log.d("AuthWithPushNotificationActivity", "AuthNotificationActivity checkIntentForNotification")
+    val storage = SharedPreferencesStorage(this)
 
     try {
       setIntent(null);
@@ -36,10 +38,14 @@ class AuthWithPushNotificationActivity : ReactActivity() {
 
         OSAuthWithPushNotificationModule.notificationCommand = command
 
-        val newIntent = Intent(this, Class.forName("com.example.reactnativeonespanbridgeandroid.MainActivity"))
-        startActivity(newIntent)
+        val activityPath = storage.getStorageMainActivityPath() ?: ""
+
+        val newIntent = Intent(this, Class.forName(activityPath))
 
         finish()
+        reactInstanceManager.currentReactContext?.currentActivity?.finish()
+
+        startActivity(newIntent)
       }
 
     } catch (e: NotificationSDKClientException) {

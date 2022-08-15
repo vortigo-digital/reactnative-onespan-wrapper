@@ -7,6 +7,7 @@ import com.facebook.react.uimanager.ViewManager
 import com.reactnativeonespanbridgeandroid.activation.OSActivationModule
 import com.reactnativeonespanbridgeandroid.authentication.OSAuthWithPushNotificationModule
 import com.reactnativeonespanbridgeandroid.notification.OSRegisterNotificationModule
+import com.reactnativeonespanbridgeandroid.scanner.OSScannerModule
 import com.reactnativeonespanbridgeandroid.settings.OSSettingsModule
 
 class OnespanBridgeAndroidPackage : ReactPackage {
@@ -15,7 +16,8 @@ class OnespanBridgeAndroidPackage : ReactPackage {
       OSSettingsModule(reactContext),
       OSActivationModule(reactContext),
       OSRegisterNotificationModule(reactContext),
-      OSAuthWithPushNotificationModule(reactContext)
+      OSAuthWithPushNotificationModule(reactContext),
+      OSScannerModule(reactContext)
     )
   }
 

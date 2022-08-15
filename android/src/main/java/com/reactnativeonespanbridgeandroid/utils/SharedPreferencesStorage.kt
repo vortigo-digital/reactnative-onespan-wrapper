@@ -12,6 +12,10 @@ class SharedPreferencesStorage(context: Context) {
 
   fun getCurrentUser() = sharedPreferencesGetString(PREF_USERID)
 
+  fun removeCurrentUser() {
+    sharedPreferencesRemove(PREF_USERID)
+  }
+
   fun storageNotificationIdForUser(userIdentifier: String, notificationId: String) {
     sharedPreferencesPutString("$PREF_NOTIFICATION_ID-$userIdentifier", notificationId)
   }
@@ -22,6 +26,12 @@ class SharedPreferencesStorage(context: Context) {
   fun removeNotificationIdForUser(userIdentifier: String) {
     sharedPreferencesRemove("$PREF_NOTIFICATION_ID-$userIdentifier")
   }
+
+  fun storageMainActivityPath(path: String) {
+    sharedPreferencesPutString(ACTIVITY_PATH, path)
+  }
+
+  fun getStorageMainActivityPath() = sharedPreferencesGetString(ACTIVITY_PATH)
 
   private fun sharedPreferencesPutString(key: String, value: String) {
     val editor = sharedPreferences.edit()
@@ -43,8 +53,6 @@ class SharedPreferencesStorage(context: Context) {
     const val PREF_KEY = "preferences"
     const val PREF_USERID = "userIdentifier"
     const val PREF_NOTIFICATION_ID = "notificationId"
-    const val ACCOUNT_ID = "accountIdentifier"
-    const val SALT_STORAGE = "saltStorage"
-    const val SALT_DIGIPASS = "saltDigipass"
+    const val ACTIVITY_PATH = "mainActivityPath"
   }
 }

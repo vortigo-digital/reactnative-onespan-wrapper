@@ -28,7 +28,8 @@ import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
 const response = await OnespanWrapper.config(
   domainIdentifier,
   saltStorage,
-  saltDigipass
+  saltDigipass,
+  mainActivityPath
 );
 ```
 
@@ -38,7 +39,7 @@ const response = await OnespanWrapper.config(
 
 #### Application Workflow
 
-![User Self-Registration](https://github.com/vortigo-digital/reactnative-onespan-wrapper/raw/main/assets/images/UserSelfRegistration.png)
+![User Self-Registration](https://github.com/vortigo-digital/reactnative-onespan-wrapper/raw/main/assets/images/SelfRegistration.png)
 
 ## **Activation command**
 
@@ -119,7 +120,7 @@ const response = await OnespanWrapper.execute(command);
 
 #### Application workflow
 
-![Push Notification Registration](https://github.com/vortigo-digital/reactnative-onespan-wrapper/raw/main/assets/images/PushNotificationRegistrations.png)
+![Push Notification Registration](https://github.com/vortigo-digital/reactnative-onespan-wrapper/raw/main/assets/images/NotificationRegistration.png)
 
 ## **OnespanRegisterNotification command**
 
@@ -146,13 +147,14 @@ const onespanRegisterNotification = async () => {
   } while (substring !== 'notificationId');
 };
 ```
+
 ---
 
 ### User Authentication With Push Notifications
+
 #### Application workflow
 
-![Untitled](https://user-images.githubusercontent.com/110695007/183150555-df861d0c-d1ce-41ed-b6c0-031b54a771e3.png)
-
+![Application workflow](https://github.com/vortigo-digital/reactnative-onespan-wrapper/raw/main/assets/images/PushNotification.png)
 
 ## **To Check new notifications (can be used on useEffect)**
 

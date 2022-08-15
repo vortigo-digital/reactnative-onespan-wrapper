@@ -4,9 +4,23 @@
  */
 
 import React, { useEffect } from 'react';
-import { Button } from 'react-native';
+import { NativeModules, Button } from 'react-native';
 import { executeAPICommand } from './apiUtils';
 import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
+
+const {
+  OSSettingsModule,
+  OSActivationModule,
+  OSRegisterNotificationModule,
+  OSAuthWithPushNotificationModule,
+  OSScannerModule,
+} = NativeModules;
+
+const data = {
+  user: 'art001',
+  activationCode: '1YNINfe2',
+  pin: '147369',
+};
 
 const NewModuleButton = () => {
   const onSubmit = async () => {
@@ -14,12 +28,15 @@ const NewModuleButton = () => {
 
     try {
       /*
-         OSActivationModule.activate
-         params:
-         userIdentifier: string
-         activationPassword: string
-        */
-      const command = await OnespanWrapper.activate('afaraujo06', '753u5t96');
+        OSActivationModule.activate
+        params:
+        userIdentifier: string
+        activationPassword: string
+       */
+      const command = await OSActivationModule.activate(
+        data.user,
+        data.activationCode
+      );
 
       // promisse for a command
       console.log(`activation command: ${command}`);
@@ -40,11 +57,11 @@ const NewModuleButton = () => {
   async function onespanExecute(command: string) {
     try {
       /*
-         OSActivationModule.execute
-         params:
-         command: string
-        */
-      const response = await OnespanWrapper.execute(command);
+        OSActivationModule.execute
+        params:
+        command: string
+       */
+      const response = await OSActivationModule.execute(command);
 
       // promisse for a command or success
       console.log(`onespan execute: ${response}`);
@@ -68,15 +85,29 @@ const NewModuleButton = () => {
     }
   }
 
+  // ------- remove current user -------
+  const onDelete = async () => {
+    try {
+      const response = await OSActivationModule.removeCurrentUser();
+
+      if (response) {
+        console.log(`remove user: ${response}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   // ------- register notification -------
 
   async function onespanRegisterNotification() {
     try {
       /*
-         OSRegisterNotificationModule.registerForNotifications
-         params:
-        */
-      const command = await OnespanWrapper.registerNotification.register();
+        OSRegisterNotificationModule.registerForNotifications
+        params:
+       */
+      const command =
+        await OSRegisterNotificationModule.registerForNotifications();
 
       // promisse for a command
       console.log(`notification command: ${command}`);
@@ -97,13 +128,11 @@ const NewModuleButton = () => {
   async function onespanNotificationExecute(command: string) {
     try {
       /*
-         OSRegisterNotificationModule.execute
-         params:
-         command: string
-        */
-      const response = await OnespanWrapper.registerNotification.execute(
-        command
-      );
+        OSRegisterNotificationModule.execute
+        params:
+        command: string
+       */
+      const response = await OSRegisterNotificationModule.execute(command);
 
       // promisse for a command or "notificationId:0123.."
       let substring = response.substring(0, 14);
@@ -136,17 +165,18 @@ const NewModuleButton = () => {
   async function setOnespanSettings() {
     try {
       /*
-         OSSettingsModule.setSettings
-         params:
-         domainIdentifier: string
-         saltStorage: string
-         saltDigipass: string
-        */
-
-      const response = await OnespanWrapper.config(
+        OSSettingsModule.setSettings
+        params:
+        domainIdentifier: string
+        saltStorage: string
+        saltDigipass: string
+        mainActivityPath: string - ex: com.package.name.YourActivity - needs for push notification
+       */
+      const response = await OSSettingsModule.setSettings(
         'sybrandreinders-vort',
         '38af4675075cb1971a5fe79d59e702d711577b40a6e06ab75696bbd4aaddebdc',
-        '5910c093a9e6777c8291679ed655328da20958f2c4a11e03a3768b9e12e36d73'
+        '5910c093a9e6777c8291679ed655328da20958f2c4a11e03a3768b9e12e36d73',
+        'com.example.reactnativeonespanbridgeandroid.MainActivity'
       );
 
       // promisse for a success response string
@@ -165,10 +195,11 @@ const NewModuleButton = () => {
   async function checkNotification() {
     try {
       /*
-        OSAuthWithPushNotificationModule.checkNotificationAndExecute
-        always check if received push notification
-       */
-      const response = await OnespanWrapper.pushNotification.checkAndExecute();
+       OSAuthWithPushNotificationModule.checkNotificationAndExecute
+       always check if received push notification
+      */
+      const response =
+        await OSAuthWithPushNotificationModule.checkNotificationAndExecute();
 
       // promisse for a command or ""
       console.log(`checkNotificationAndExecute ${response}`);
@@ -191,11 +222,11 @@ const NewModuleButton = () => {
   async function onespanAuthPushNotificationExecute(command: string) {
     try {
       /*
-         OSAuthWithPushNotificationModule.execute
-         params:
-         command: string
-        */
-      const response = await OnespanWrapper.pushNotification.execute(command);
+        OSAuthWithPushNotificationModule.execute
+        params:
+        command: string
+       */
+      const response = await OSAuthWithPushNotificationModule.execute(command);
 
       // promisse for a command or dataToDisplay or success
       let splitString = response.split(':');
@@ -225,14 +256,13 @@ const NewModuleButton = () => {
 
   async function onespanAuthenticationApproved(approved: boolean) {
     /*
-       OSAuthWithPushNotificationModule.authenticationApproved
-       params:
-       approved: boolean
-     */
+      OSAuthWithPushNotificationModule.authenticationApproved
+      params:
+      approved: boolean
+    */
     try {
-      const response = await OnespanWrapper.pushNotification.isApproved(
-        approved
-      );
+      const response =
+        await OSAuthWithPushNotificationModule.authenticationApproved(approved);
 
       // promisse for a pin(required) or command
       console.log(`authenticationApproved ${response}`);
@@ -240,7 +270,7 @@ const NewModuleButton = () => {
 
       if (splitString[0] == 'pin') {
         // create a view with password field
-        onespanOnUserAuthenticationInput('147369');
+        onespanOnUserAuthenticationInput(data.pin);
       } else {
         // request to /v1/orchestration-commands OCA
         const apiResponseCommand = await executeAPICommand(response);
@@ -257,13 +287,14 @@ const NewModuleButton = () => {
   }
 
   /*
-       OSAuthWithPushNotificationModule.onUserAuthenticationInput
-       params:
-       pin: string
-     */
+      OSAuthWithPushNotificationModule.onUserAuthenticationInput
+      params:
+      pin: string
+    */
   async function onespanOnUserAuthenticationInput(pin: string) {
     // if user aborted authentication - send "" or send pin for auth
-    const response = await OnespanWrapper.pushNotification.authWithPin(pin);
+    const response =
+      await OSAuthWithPushNotificationModule.onUserAuthenticationInput(pin);
 
     // promisse for a command
     console.log(`onUserAuthenticationInput ${response}`);
@@ -280,9 +311,34 @@ const NewModuleButton = () => {
     }
   }
 
+  // ------- start QRCode Scanner -------
+  const onScan = async () => {
+    try {
+      const response = await OSScannerModule.scanQrCode();
+
+      // promisse for a command / "canceled:" or "exception:"
+      console.log(`onScan: ${response}`);
+
+      if (response) {
+        // request to /v1/orchestration-commands OCA
+        const apiResponseCommand = await executeAPICommand(response);
+
+        if (apiResponseCommand) {
+          // send command to orchestrationSDK.execute
+          console.log(`apiResponseCommand: ${apiResponseCommand}`);
+          onespanAuthPushNotificationExecute(apiResponseCommand);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <>
       <Button title="Start Activation!" color="#841584" onPress={onSubmit} />
+      <Button title="Remove current user" color="#841584" onPress={onDelete} />
+      <Button title="Scan QRCode" color="#841584" onPress={onScan} />
     </>
   );
 };

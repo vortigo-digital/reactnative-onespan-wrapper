@@ -158,13 +158,12 @@ dependencies {
   implementation 'com.google.firebase:firebase-analytics-ktx'
   implementation 'com.google.firebase:firebase-messaging'
 
-  // koin
-  implementation 'io.insert-koin:koin-android:3.2.0'
-
-  //retrofit - gson - interceptor
-  implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-  implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-  implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+  // camera x
+  def camerax_version = '1.1.0'
+  implementation "androidx.camera:camera-core:$camerax_version"
+  implementation "androidx.camera:camera-camera2:$camerax_version"
+  implementation "androidx.camera:camera-lifecycle:$camerax_version"
+  implementation "androidx.camera:camera-view:$camerax_version"
 
   //Local LIBs
   implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
@@ -177,6 +176,7 @@ dependencies {
   implementation files('sdk_dsapp_client_android:4.28.0.536')
   implementation files('sdk_device_binding_android:5.0.2.800')
   implementation files('sdk_secure_storage_android:4.28.0.862')
+  implementation files('sdk_qrcode_scanner:4.27.0')
 
   implementation 'com.esotericsoftware:kryo:5.3.0'
   implementation 'org.bouncycastle:bcprov-ext-jdk15to18:1.70'

@@ -18,7 +18,7 @@ import com.vasco.orchestration.client.user.OrchestrationUser
 import java.lang.ref.WeakReference
 
 class OSActivationModule(
-  private val reactContext: ReactApplicationContext
+  reactContext: ReactApplicationContext
 ) : ReactContextBaseJavaModule(reactContext),
   OnlineActivationCallback,
   OrchestrationWarningCallback,
@@ -26,8 +26,10 @@ class OSActivationModule(
 
   override fun getName() = "OSActivationModule"
 
-  private lateinit var orchestrator: Orchestrator
+  private var orchestrator: Orchestrator? = null
+
   private lateinit var activationPromise: Promise
+
   private val storage = SharedPreferencesStorage(reactContext)
   private var userID = ""
 
@@ -40,9 +42,26 @@ class OSActivationModule(
     activationPromise = promise
     userID = userIdentifier
 
-    reactContext.currentActivity?.let { currentActivity ->
+    val localOrchestrator = getOrchestrator()
 
-      orchestrator = Orchestrator.Builder()
+    CDDCUtils.configure(localOrchestrator.cddcDataFeeder)
+
+    val activationParams = OnlineActivationParams()
+    activationParams.setActivationCallback(this)
+    activationParams.orchestrationUser = OrchestrationUser(userIdentifier)
+    activationParams.activationPassword = activationPassword
+
+    localOrchestrator.startActivation(activationParams)
+
+  }
+
+  private fun getOrchestrator(): Orchestrator {
+
+    var instanceOrchestration = orchestrator
+
+    if (instanceOrchestration == null) {
+
+      instanceOrchestration = Orchestrator.Builder()
         .setDigipassSalt(SessionHelper.saltDigipass)
         .setStorageSalt(SessionHelper.saltStorage)
         .setContext(currentActivity)
@@ -51,17 +70,12 @@ class OSActivationModule(
         .setCDDCParams(CDDCUtils.getCDDCParams())
         .setErrorCallback(this)
         .setWarningCallback(this)
-        .build()
+        .build()!!
 
-      CDDCUtils.configure(orchestrator.cddcDataFeeder)
-
-      val activationParams = OnlineActivationParams()
-      activationParams.setActivationCallback(this)
-      activationParams.orchestrationUser = OrchestrationUser(userIdentifier)
-      activationParams.activationPassword = activationPassword
-
-      orchestrator.startActivation(activationParams)
+      orchestrator = instanceOrchestration
     }
+
+    return instanceOrchestration
   }
 
   override fun onActivationSuccess() {
@@ -92,9 +106,28 @@ class OSActivationModule(
   @ReactMethod
   fun execute(command: String, promise: Promise) {
     Log.d(name, "execute command: $command")
+    val localOrchestrator = getOrchestrator()
 
     activationPromise = promise
-    orchestrator.execute(command)
+    localOrchestrator.execute(command)
+  }
+
+  @ReactMethod
+  fun removeCurrentUser(promise: Promise) {
+    val localOrchestrator = getOrchestrator()
+
+    try {
+      val orchestratorUser = OrchestrationUser(storage.getCurrentUser())
+      localOrchestrator.userManager.deleteUser(orchestratorUser)
+      storage.removeNotificationIdForUser(storage.getCurrentUser() ?: "")
+      storage.removeCurrentUser()
+      promise.resolve("success")
+
+    } catch (e: Exception) {
+      Log.d(name, "removeCurrentUser exception ${e.message}")
+      e.printStackTrace()
+      promise.reject(e)
+    }
   }
 
   override fun onOrchestrationWarning(warning: OrchestrationWarning?) {

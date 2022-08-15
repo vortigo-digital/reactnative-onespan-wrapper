@@ -26,7 +26,12 @@ import {
 } from '../components';
 
 import { advanceStep } from '../utils/APP';
-import { registerUserOnAPI, executeAPICommand } from '../utils/API';
+import {
+  registerUserOnAPI,
+  executeAPICommand,
+  loginWithPIN,
+  loginWithFingerprint,
+} from '../utils/API';
 import initialConfig from '../config/initialConfig';
 /////////////////////////////////////////////////////////////////////////
 // DEMO APP
@@ -51,6 +56,7 @@ const App = () => {
     staticPassword: string;
     saltStorage: string;
     saltDigipass: string;
+    mainActivityPath: string;
   };
 
   /////////////////////////////////////////////////////////////////////////
@@ -64,6 +70,8 @@ const App = () => {
   const [isRegistered, setIsRegistered] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
   const [isConfigured, setIsConfigured] = useState(false);
+  const [notificationIdIsRegistered, setNotificationIdIsRegistered] =
+    useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [commands, setCommands] = useState<string[]>([]);
   const [history, setHistory] = useState<string[]>([]);
@@ -87,6 +95,7 @@ const App = () => {
   };
 
   const resetState = () => {
+    setNotificationIdIsRegistered(false);
     setShowPIN(false);
     setIsSignedIn(false);
     setCommands([]);
@@ -150,7 +159,8 @@ const App = () => {
     const result = await OnespanWrapper.config(
       config.domainIdentifier,
       config.saltStorage,
-      config.saltDigipass
+      config.saltDigipass,
+      config.mainActivityPath
     );
     return result;
   };
@@ -280,6 +290,7 @@ const App = () => {
           `${response.replace('notificationId:', '')}`,
         ]);
         setIsLoading(false);
+        setNotificationIdIsRegistered(true);
         goToNextStep();
       } else {
         // request to /v1/orchestration-commands OCA
@@ -371,6 +382,10 @@ const App = () => {
        params:
        approved: boolean
      */
+    if (!approved) {
+      showLoginConfirmationIsVisible(false);
+      return;
+    }
     try {
       const response = await OnespanWrapper.pushNotification.isApproved(
         approved
@@ -418,6 +433,41 @@ const App = () => {
     }
     return false;
   }
+
+  const onScan = async () => {
+    try {
+      const response = await OnespanWrapper.scanQrCode();
+
+      // promisse for a command / "canceled:" or "exception:"
+      console.log(`onScan: ${response}`);
+
+      if (response) {
+        // request to /v1/orchestration-commands OCA
+        const apiResponseCommand = await executeAPICommand(response);
+
+        if (apiResponseCommand) {
+          // send command to orchestrationSDK.execute
+          console.log(`apiResponseCommand: ${apiResponseCommand}`);
+          onespanAuthPushNotificationExecute(apiResponseCommand);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // ------- remove current user -------
+  const onDelete = async () => {
+    try {
+      const response = await OnespanWrapper.removeCurrentUser();
+
+      if (response) {
+        console.log(`remove user: ${response}`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   // Push Notification Methods
@@ -517,7 +567,51 @@ const App = () => {
         return <View />;
     }
   };
-
+  const RemoveUserButton = () => {
+    return (
+      <>
+        <Button
+          style={{
+            width: '100%',
+            marginTop: 50,
+            marginBottom: 10,
+          }}
+          onPress={() => onDelete()}
+        >
+          Remove current user
+        </Button>
+      </>
+    );
+  };
+  const PushNotificationButtons = () => {
+    return (
+      <>
+        <Button
+          style={{
+            width: '100%',
+            marginTop: 50,
+            marginBottom: 10,
+          }}
+          onPress={() =>
+            loginWithPIN(config.userIdentifier, config.domainIdentifier)
+          }
+        >
+          Request login with PIN
+        </Button>
+        <Button
+          style={{ width: '100%', marginBottom: 10 }}
+          onPress={() =>
+            loginWithFingerprint(config.userIdentifier, config.domainIdentifier)
+          }
+        >
+          Request login with Fingerprint
+        </Button>
+        <Button style={{ width: '100%' }} onPress={() => onScan()}>
+          Scan QR Code
+        </Button>
+      </>
+    );
+  };
   const MainContent = () => {
     switch (currentStep) {
       case 'configureApp':
@@ -530,23 +624,33 @@ const App = () => {
               saltDigipass={config.saltDigipass}
               onSubmit={configSDK}
             />
+            {/* <PushNotificationButtons />
+            <RemoveUserButton /> */}
           </>
         );
       case 'registerUser':
         return (
-          <UserRegisterForm
-            userIdentifier={config.userIdentifier}
-            staticPassword={config.staticPassword || ''}
-            onSubmit={registerUser}
-          />
+          <>
+            <UserRegisterForm
+              userIdentifier={config.userIdentifier}
+              staticPassword={config.staticPassword || ''}
+              onSubmit={registerUser}
+            />
+            {/* <PushNotificationButtons />
+            <RemoveUserButton /> */}
+          </>
         );
       case 'activateUser':
         return (
-          <ActivationForm
-            userIdentifier={config.userIdentifier}
-            activationPassword={activationPassword || ''}
-            onSubmit={activateUser}
-          />
+          <>
+            <ActivationForm
+              userIdentifier={config.userIdentifier}
+              activationPassword={activationPassword || ''}
+              onSubmit={activateUser}
+            />
+            <PushNotificationButtons />
+            <RemoveUserButton />
+          </>
         );
       case 'registerNotification':
         return (
@@ -565,6 +669,7 @@ const App = () => {
         return <View />;
     }
   };
+
   return (
     <Container>
       {loading ? (
@@ -583,7 +688,9 @@ const App = () => {
             </Button>
             <Button
               style={{ width: 150, marginLeft: 10 }}
-              onPress={() => onespanAuthenticationApproved(false)}
+              onPress={() => {
+                onespanAuthenticationApproved(false);
+              }}
             >
               No
             </Button>
@@ -623,7 +730,14 @@ const App = () => {
             </>
           )}
           <FormWrapper>
-            {isLoading ? <ActivityIndicator /> : <MainContent />}
+            {isLoading ? (
+              <ActivityIndicator />
+            ) : (
+              <>
+                <MainContent />
+                {notificationIdIsRegistered && <PushNotificationButtons />}
+              </>
+            )}
           </FormWrapper>
         </>
       )}

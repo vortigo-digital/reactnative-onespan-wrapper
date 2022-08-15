@@ -3,6 +3,7 @@ import { NativeModules } from 'react-native';
 const {
   OSSettingsModule,
   OSActivationModule,
+  OSScannerModule,
   OSRegisterNotificationModule,
   OSAuthWithPushNotificationModule,
 } = NativeModules;
@@ -10,7 +11,8 @@ const {
 const config = async (
   domainIdentifier: string,
   saltStorage: string,
-  saltDigipass: string
+  saltDigipass: string,
+  mainActivityPath: string
 ): Promise<string> => {
   /**
    * Configures the SDK
@@ -26,7 +28,8 @@ const config = async (
   const result = await OSSettingsModule.setSettings(
     domainIdentifier,
     saltStorage,
-    saltDigipass
+    saltDigipass,
+    mainActivityPath
   );
   return result;
 };
@@ -65,11 +68,20 @@ function pushNotificationIsApproved(approved: string): Promise<string> {
 function onUserAuthenticationInput(pin: string): Promise<string> {
   return OSAuthWithPushNotificationModule.onUserAuthenticationInput(pin);
 }
+function removeCurrentUser(): Promise<string> {
+  return OSActivationModule.removeCurrentUser();
+}
+
+function scanQrCode(): Promise<string> {
+  return OSScannerModule.scanQrCode();
+}
 
 export default {
   config,
   activate,
   execute,
+  removeCurrentUser,
+  scanQrCode,
   registerNotification: {
     register: registerNotification,
     execute: executeNotification,

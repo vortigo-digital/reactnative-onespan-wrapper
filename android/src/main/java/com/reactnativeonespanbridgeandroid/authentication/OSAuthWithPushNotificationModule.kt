@@ -15,7 +15,7 @@ import com.vasco.orchestration.client.flows.remote_authentication.RemoteAuthenti
 import java.lang.ref.WeakReference
 
 class OSAuthWithPushNotificationModule(
-  private val reactContext: ReactApplicationContext
+  reactContext: ReactApplicationContext
 ) : ReactContextBaseJavaModule(reactContext),
   RemoteAuthenticationCallback,
   UserAuthenticationCallback,
@@ -30,7 +30,8 @@ class OSAuthWithPushNotificationModule(
 
   private lateinit var authenticationPromise: Promise
 
-  private lateinit var orchestrator: Orchestrator
+  private var orchestrator: Orchestrator? = null
+
   private lateinit var remoteAuthDisplayDataCaller: RemoteAuthenticationCallback.DisplayDataCaller
   private lateinit var inputCallback: UserAuthenticationInputCallback
 
@@ -49,7 +50,36 @@ class OSAuthWithPushNotificationModule(
     Log.d(name, "setOrchestratorAndExecute")
 
     try {
-      orchestrator = Orchestrator.Builder()
+      val localOrchestrator = getOrchestrator()
+
+      CDDCUtils.configure(localOrchestrator.cddcDataFeeder)
+
+      localOrchestrator.setRemoteAuthCallback(this)
+      // used for custom password instead of default one
+      localOrchestrator.setUserAuthenticationCallback(this, arrayOf(UserAuthentication.PASSWORD))
+
+      val command = notificationCommand ?: ""
+      notificationCommand = null
+
+      Log.d(name, "setOrchestratorAndExecute command: $command")
+
+      localOrchestrator.execute(command)
+
+    } catch (e: Exception) {
+      Log.e(name, e.message ?: "")
+
+      e.printStackTrace()
+      authenticationPromise.reject(e)
+    }
+  }
+
+  private fun getOrchestrator(): Orchestrator {
+
+    var instanceOrchestration = orchestrator
+
+    if (instanceOrchestration == null) {
+
+      instanceOrchestration = Orchestrator.Builder()
         .setDigipassSalt(SessionHelper.saltDigipass)
         .setStorageSalt(SessionHelper.saltStorage)
         .setContext(currentActivity)
@@ -58,28 +88,12 @@ class OSAuthWithPushNotificationModule(
         .setCDDCParams(CDDCUtils.getCDDCParams())
         .setErrorCallback(this)
         .setWarningCallback(this)
-        .build()
+        .build()!!
 
-      CDDCUtils.configure(orchestrator.cddcDataFeeder)
-
-      orchestrator.setRemoteAuthCallback(this)
-
-      // used for custom password instead of default one
-      orchestrator.setUserAuthenticationCallback(this, arrayOf(UserAuthentication.PASSWORD))
-
-      val command = notificationCommand ?: ""
-      notificationCommand = null
-
-      Log.d(name, "setOrchestratorAndExecute command: $command")
-
-      orchestrator.execute(command)
-
-    } catch (e: Exception) {
-      Log.e(name, e.message ?: "")
-
-      e.printStackTrace()
-      authenticationPromise.reject(e)
+      orchestrator = instanceOrchestration
     }
+
+    return instanceOrchestration
   }
 
   override fun onRemoteAuthenticationStepComplete(command: String) {
@@ -90,10 +104,10 @@ class OSAuthWithPushNotificationModule(
 
   @ReactMethod
   fun execute(command: String, promise: Promise) {
-    Log.d(name, "execute command: $command")
-
     authenticationPromise = promise
-    orchestrator.execute(command)
+
+    val localOrchestrator = getOrchestrator()
+    localOrchestrator.execute(command)
   }
 
   override fun onRemoteAuthenticationDisplayData(
@@ -139,7 +153,10 @@ class OSAuthWithPushNotificationModule(
       else -> ""
     }
 
-    Log.d(name, "onRemoteAuthenticationSessionOutdated Session outdated: ${reason?.name} - $sessionOutdated")
+    Log.d(
+      name,
+      "onRemoteAuthenticationSessionOutdated Session outdated: ${reason?.name} - $sessionOutdated"
+    )
   }
 
   override fun onRemoteAuthenticationAborted() {
@@ -173,7 +190,10 @@ class OSAuthWithPushNotificationModule(
   }
 
   override fun onUserAuthenticationInputError(error: InputError?) {
-    Log.e(name, "onUserAuthenticationInputError. ${error?.errorCode} / exception: ${error?.inputException}")
+    Log.e(
+      name,
+      "onUserAuthenticationInputError. ${error?.errorCode} / exception: ${error?.inputException}"
+    )
 
     authenticationPromise.reject("passwordError", "${error?.errorCode}")
   }

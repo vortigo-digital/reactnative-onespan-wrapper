@@ -5,25 +5,23 @@
 
   <!-- Needed for online activation and general networking usage -->
   <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Needed for Bluetooth collect in CDDC -->
 
-  <!-- Needed for Bluetooth collect in CDDC -->
   <uses-permission
     android:name="android.permission.BLUETOOTH"
     android:maxSdkVersion="30" />
   <uses-permission
     android:name="android.permission.BLUETOOTH_ADMIN"
     android:maxSdkVersion="30" />
+
   <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-
-  <!-- Needed for Wifi collect in CDDC -->
+  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" /> <!-- Needed for Wifi collect in CDDC -->
   <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-  <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
-  <!-- Needed for Geolocation, Bluetooth and Wifi CDDC collection -->
+  <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" /> <!-- Needed for Geolocation, Bluetooth and Wifi CDDC collection -->
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.CAMERA" />
+  <uses-permission android:name="android.permission.VIBRATE" />
 
   <application>
 
@@ -48,27 +46,11 @@
         <category android:name="android.intent.category.DEFAULT" />
         <data android:mimeType="application/onespan-android-module" />
       </intent-filter>
-
     </activity>
 
-    <!--<receiver
-      android:name=".notification.AuthBroadcastReceiver"
-      android:exported="true">
-      <intent-filter tools:ignore="AppLinkUrlError">
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <data android:mimeType="application/onespan-android-module" />
-        <data android:mimeType="text/plain" />
-      </intent-filter>
-    </receiver>-->
-
-    <!--<service
-      android:name="com.google.firebase.messaging.FirebaseMessagingService"
-      android:exported="false">
-      <intent-filter>
-        <action android:name="com.google.firebase.MESSAGING_EVENT" />
-      </intent-filter>
-    </service>-->
+    <activity
+      android:name=".scanner.QRCodeScannerActivity"
+      android:exported="false" />
 
   </application>
 
