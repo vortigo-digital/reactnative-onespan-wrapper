@@ -31,6 +31,7 @@ import {
   executeAPICommand,
   loginWithPIN,
   loginWithFingerprint,
+  unassignUsers,
 } from '../utils/API';
 import initialConfig from '../config/initialConfig';
 /////////////////////////////////////////////////////////////////////////
@@ -473,6 +474,7 @@ const App = () => {
   // Push Notification Methods
   ///////////////////////////////////////////////////////////////////////////////////////////////////
   const initApp = async () => {
+    // unassignUsers();
     setLoading(true); // DEMO APP
     await resetState(); // DEMO APP
     await configureSDK(); //////////////////// SDK ////////////////////

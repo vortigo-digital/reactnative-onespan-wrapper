@@ -268,3 +268,47 @@ async function onespanOnUserAuthenticationInput(pin: string) {
   }
 }
 ```
+
+## **Auth with CRONTO**
+
+```js
+import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
+```
+
+```js
+const responseScan = await OnespanWrapper.scanQrCode();
+```
+
+```js
+const response = await OnespanWrapper.pushNotification.execute(responseScan);
+```
+
+Example
+
+```js
+const onScan = async () => {
+  try {
+    const responseScan = await OnespanWrapper.scanQrCode();
+    console.log(`responseScan: ${responseScan}`);
+
+    const response = await OnespanWrapper.pushNotification.execute(
+      responseScan
+    );
+    // promisse for a command / "canceled:" or "exception:"
+    console.log(`onScan.execute: ${response}`);
+
+    if (response) {
+      // request to /v1/orchestration-commands OCA
+      const apiResponseCommand = await executeAPICommand(response);
+
+      if (apiResponseCommand) {
+        // send command to orchestrationSDK.execute
+        console.log(`apiResponseCommand: ${apiResponseCommand}`);
+        onespanAuthPushNotificationExecute(apiResponseCommand);
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+```

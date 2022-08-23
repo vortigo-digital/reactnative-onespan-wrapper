@@ -52,12 +52,6 @@ class OSAuthWithPushNotificationModule(
     try {
       val localOrchestrator = getOrchestrator()
 
-      CDDCUtils.configure(localOrchestrator.cddcDataFeeder)
-
-      localOrchestrator.setRemoteAuthCallback(this)
-      // used for custom password instead of default one
-      localOrchestrator.setUserAuthenticationCallback(this, arrayOf(UserAuthentication.PASSWORD))
-
       val command = notificationCommand ?: ""
       notificationCommand = null
 
@@ -89,6 +83,12 @@ class OSAuthWithPushNotificationModule(
         .setErrorCallback(this)
         .setWarningCallback(this)
         .build()!!
+
+      CDDCUtils.configure(instanceOrchestration.cddcDataFeeder)
+
+      instanceOrchestration.setRemoteAuthCallback(this)
+      // used for custom password instead of default one
+      instanceOrchestration.setUserAuthenticationCallback(this, arrayOf(UserAuthentication.PASSWORD))
 
       orchestrator = instanceOrchestration
     }

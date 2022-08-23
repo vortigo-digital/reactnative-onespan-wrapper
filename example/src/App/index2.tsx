@@ -4,21 +4,13 @@
  */
 
 import React, { useEffect } from 'react';
-import { NativeModules, Button } from 'react-native';
+import { Button } from 'react-native';
 import { executeAPICommand } from './apiUtils';
 import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
 
-const {
-  OSSettingsModule,
-  OSActivationModule,
-  OSRegisterNotificationModule,
-  OSAuthWithPushNotificationModule,
-  OSScannerModule,
-} = NativeModules;
-
 const data = {
-  user: 'art001',
-  activationCode: '1YNINfe2',
+  user: 'vortigo123',
+  activationCode: 'fKBIz6M7',
   pin: '147369',
 };
 
@@ -33,7 +25,7 @@ const NewModuleButton = () => {
         userIdentifier: string
         activationPassword: string
        */
-      const command = await OSActivationModule.activate(
+      const command = await OnespanWrapper.activate(
         data.user,
         data.activationCode
       );
@@ -61,7 +53,7 @@ const NewModuleButton = () => {
         params:
         command: string
        */
-      const response = await OSActivationModule.execute(command);
+      const response = await OnespanWrapper.execute(command);
 
       // promisse for a command or success
       console.log(`onespan execute: ${response}`);
@@ -88,7 +80,7 @@ const NewModuleButton = () => {
   // ------- remove current user -------
   const onDelete = async () => {
     try {
-      const response = await OSActivationModule.removeCurrentUser();
+      const response = await OnespanWrapper.removeCurrentUser();
 
       if (response) {
         console.log(`remove user: ${response}`);
@@ -106,8 +98,7 @@ const NewModuleButton = () => {
         OSRegisterNotificationModule.registerForNotifications
         params:
        */
-      const command =
-        await OSRegisterNotificationModule.registerForNotifications();
+      const command = await OnespanWrapper.registerNotification.register();
 
       // promisse for a command
       console.log(`notification command: ${command}`);
@@ -132,7 +123,9 @@ const NewModuleButton = () => {
         params:
         command: string
        */
-      const response = await OSRegisterNotificationModule.execute(command);
+      const response = await OnespanWrapper.registerNotification.execute(
+        command
+      );
 
       // promisse for a command or "notificationId:0123.."
       let substring = response.substring(0, 14);
@@ -172,7 +165,7 @@ const NewModuleButton = () => {
         saltDigipass: string
         mainActivityPath: string - ex: com.package.name.YourActivity - needs for push notification
        */
-      const response = await OSSettingsModule.setSettings(
+      const response = await OnespanWrapper.config(
         'sybrandreinders-vort',
         '38af4675075cb1971a5fe79d59e702d711577b40a6e06ab75696bbd4aaddebdc',
         '5910c093a9e6777c8291679ed655328da20958f2c4a11e03a3768b9e12e36d73',
@@ -198,8 +191,7 @@ const NewModuleButton = () => {
        OSAuthWithPushNotificationModule.checkNotificationAndExecute
        always check if received push notification
       */
-      const response =
-        await OSAuthWithPushNotificationModule.checkNotificationAndExecute();
+      const response = await OnespanWrapper.pushNotification.checkAndExecute();
 
       // promisse for a command or ""
       console.log(`checkNotificationAndExecute ${response}`);
@@ -226,7 +218,7 @@ const NewModuleButton = () => {
         params:
         command: string
        */
-      const response = await OSAuthWithPushNotificationModule.execute(command);
+      const response = await OnespanWrapper.pushNotification.execute(command);
 
       // promisse for a command or dataToDisplay or success
       let splitString = response.split(':');
@@ -261,8 +253,9 @@ const NewModuleButton = () => {
       approved: boolean
     */
     try {
-      const response =
-        await OSAuthWithPushNotificationModule.authenticationApproved(approved);
+      const response = await OnespanWrapper.pushNotification.isApproved(
+        approved
+      );
 
       // promisse for a pin(required) or command
       console.log(`authenticationApproved ${response}`);
@@ -293,8 +286,7 @@ const NewModuleButton = () => {
     */
   async function onespanOnUserAuthenticationInput(pin: string) {
     // if user aborted authentication - send "" or send pin for auth
-    const response =
-      await OSAuthWithPushNotificationModule.onUserAuthenticationInput(pin);
+    const response = await OnespanWrapper.pushNotification.authWithPin(pin);
 
     // promisse for a command
     console.log(`onUserAuthenticationInput ${response}`);
@@ -314,10 +306,14 @@ const NewModuleButton = () => {
   // ------- start QRCode Scanner -------
   const onScan = async () => {
     try {
-      const response = await OSScannerModule.scanQrCode();
+      const responseScan = await OnespanWrapper.scanQrCode();
+      console.log(`responseScan: ${responseScan}`);
 
+      const response = await OnespanWrapper.pushNotification.execute(
+        responseScan
+      );
       // promisse for a command / "canceled:" or "exception:"
-      console.log(`onScan: ${response}`);
+      console.log(`onScan.execute: ${response}`);
 
       if (response) {
         // request to /v1/orchestration-commands OCA
