@@ -312,3 +312,13 @@ const onScan = async () => {
   }
 };
 ```
+
+## **Remove current user from device**
+
+```js
+import OnespanWrapper from '@vortigo/react-native-onespan-wrapper';
+```
+
+```js
+const response = await OnespanWrapper.removeCurrentUser();
+```
