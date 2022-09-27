@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('sdk_utilities_android-4.27.2.881.aar'))
