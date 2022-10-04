@@ -140,11 +140,11 @@ const onespanRegisterNotification = async () => {
     sdkResponse = await OnespanWrapper.registerNotification.execute(
       apiResponse
     );
-    substring = sdkResponse.substring(0, 14);
-    if (substring !== 'notificationId') {
+    subString = sdkResponse.substring(0, 14);
+    if (subString !== 'notificationId') {
       apiResponse = await executeAPICommand(sdkResponse);
     }
-  } while (substring !== 'notificationId');
+  } while (subString !== 'notificationId');
 };
 ```
 
