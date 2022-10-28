@@ -1,3 +1,17 @@
+## Project Setup
+
+Add to your project android/build.gradle:
+
+```
+maven {
+    url 'https://pkgs.dev.azure.com/vortigo-af/OneSpan/_packaging/onespan/maven/v1'
+    redentials {
+    username "vortigo-af"
+    password ""
+  }
+}
+```
+
 # React Native OneSpan Wrapper
 
 > React Native library that implements native Wrapper for Android
