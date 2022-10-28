@@ -1,2 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('sdk_biometric_sensor_android-4.25.1.656'))

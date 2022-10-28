@@ -49,6 +49,14 @@ allprojects {
       }
     }
     google()
+
+    maven {
+      url 'https://pkgs.dev.azure.com/vortigo-af/OneSpan/_packaging/onespan/maven/v1'
+      credentials {
+          username "vortigo-af"
+          password ""
+      }
+    }
     maven { url 'https://www.jitpack.io' }
   }
 }

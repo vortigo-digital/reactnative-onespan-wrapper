@@ -1,2 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('sdk_secure_storage_android-4.28.0.862.aar'))

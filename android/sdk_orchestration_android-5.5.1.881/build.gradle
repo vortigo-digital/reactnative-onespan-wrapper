@@ -1,2 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('sdk_orchestration_android-5.5.1.881.aar'))

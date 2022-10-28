@@ -3,6 +3,7 @@ buildscript {
   def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['OnespanBridgeAndroid_kotlinVersion']
 
   repositories {
+
     google()
     mavenCentral()
   }
@@ -166,16 +167,16 @@ dependencies {
   implementation "androidx.camera:camera-view:$camerax_version"
 
   //Local LIBs
-  implementation (files("sdk_biometric_sensor_android-4.25.1.656/sdk_biometric_sensor_android-4.25.1.656.aar"))
-  implementation (files("sdk_digipass_android-4.30.0.614/sdk_digipass_android-4.30.0.614.aar"))
-  implementation (files("sdk_utilities_android-4.27.2.881/sdk_utilities_android-4.27.2.881.aar"))
-  implementation (files("sdk_orchestration_android-5.5.1.881/sdk_orchestration_android-5.5.1.881.aar"))
-  implementation (files("sdk_dsapp_client_android-4.28.0.536/sdk_dsapp_client_android-4.28.0.536.aar"))
-  implementation (files("sdk_cddc_android-4.25.2.654/sdk_cddc_android-4.25.2.654.aar"))
-  implementation (files("sdk_device_binding_android-5.0.2.800/sdk_device_binding_android-5.0.2.800.aar"))
-  implementation (files("sdk_qrcode_scanner-4.27.0/sdk_qrcode_scanner-4.27.0.aar"))
-  implementation (files("sdk_notification_client_android-4.29.2.728/sdk_notification_client_android-4.29.2.728.aar"))
-  implementation (files("sdk_secure_storage_android-4.28.0.862/sdk_secure_storage_android-4.28.0.862.aar"))
+  implementation "com.vortigo.android.onespan:sdk-device-binding-android:5.0.2.800"
+  implementation "com.vortigo.android.onespan:sdk-biometric-sensor-android:4.25.1.656"
+  implementation "com.vortigo.android.onespan:sdk-digipass-android:4.30.0.614"
+  implementation "com.vortigo.android.onespan:sdk-utilities-android:4.27.2.881"
+  implementation "com.vortigo.android.onespan:sdk-orchestration-android:5.5.1.881"
+  implementation "com.vortigo.android.onespan:sdk-dsapp-client-android:4.28.0.536"
+  implementation "com.vortigo.android.onespan:sdk-cddc-android:4.25.2.654"
+  implementation "com.vortigo.android.onespan:sdk-qrcode-scanner:4.27.0"
+  implementation "com.vortigo.android.onespan:sdk-notification-client-android:4.29.2.728"
+  implementation "com.vortigo.android.onespan:sdk-secure-storage-android:4.28.0.862"
 
   implementation 'com.esotericsoftware:kryo:5.3.0'
   implementation 'org.bouncycastle:bcprov-ext-jdk15to18:1.70'

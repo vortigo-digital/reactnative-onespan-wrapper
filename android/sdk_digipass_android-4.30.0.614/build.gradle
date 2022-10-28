@@ -1,2 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('sdk_digipass_android-4.30.0.614.aar'))

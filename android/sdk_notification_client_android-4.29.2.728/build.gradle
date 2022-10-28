@@ -1,2 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('sdk_notification_client_android-4.29.2.728.aar'))

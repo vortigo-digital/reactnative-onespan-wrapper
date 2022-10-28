@@ -1,2 +1,0 @@
-configurations.maybeCreate("default")
-artifacts.add("default", file('sdk_dsapp_client_android-4.28.0.536.aar'))
