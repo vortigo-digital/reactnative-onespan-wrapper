@@ -87,19 +87,16 @@ class OSActivationModule(
 
   override fun onActivationInputError(error: OnlineActivationInputError?) {
     Log.e(name, "onActivationInputError code: ${error?.errorCode}")
-
     activationPromise.reject("errorCode", "${error?.errorCode}")
   }
 
   override fun onActivationAborted() {
     Log.e(name, "onActivationAborted")
-
     activationPromise.reject("onActivationAborted", "onActivationAborted")
   }
 
   override fun onActivationStepComplete(command: String?) {
     Log.d(name, "onActivationStepComplete / command: $command")
-
     activationPromise.resolve(command)
   }
 
@@ -132,19 +129,16 @@ class OSActivationModule(
 
   override fun onOrchestrationWarning(warning: OrchestrationWarning?) {
     Log.w(name, "onOrchestrationWarning, code:${warning?.warningCode} / exception:${warning?.exception}")
-
     //    activationPromise.reject("warningCode", "${warning?.warningCode}")
   }
 
   override fun onOrchestrationError(error: OrchestrationError?) {
     Log.e(name, "onOrchestrationError, code:${error?.errorCode} / exception:${error?.exception}")
-
     activationPromise.reject("errorCode", "${error?.errorCode}")
   }
 
   override fun onOrchestrationServerError(error: OrchestrationServerError?) {
     Log.e(name, "onOrchestrationServerError, customPayload:${error?.readableMessage}")
-
-    //    activationPromise.reject("serverError", "${error?.customPayload}")
+    activationPromise.reject("serverError", "${error?.readableMessage}")
   }
 }
